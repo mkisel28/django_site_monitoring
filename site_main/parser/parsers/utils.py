@@ -21,7 +21,7 @@ def format_date(published_at_str, website_id):
     for fmt in formats:
         try:
             published_at_dt = datetime.strptime(published_at_str, fmt)
-            # Если разбор успешен и website_id соответствует одному из указанных сайтов, корректируем время
+           
             if website_id in [32, 33]:
                 published_at_dt -= timedelta(hours=3)
             return published_at_dt.strftime('%Y-%m-%d %H:%M:%S%z')

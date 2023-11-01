@@ -39,12 +39,12 @@
     <h1>Сайты</h1>
     <div class="favorites-container">
       <h2>Избранные сайты </h2>
-      <a href="{% url 'main:all_favourite_country' %}" class="button-link">Мониторинг избранных стран</a>
+      <a href="{% url 'main:all_favourite_country' %}" class="button-link">Мониторинг избранных сайтов</a>
   </div>
   
     <div class="websites">
 
-        <!-- Избранные страны -->
+        <!-- Избранные сайты -->
         
         {% for sites in favorite_sites %}
             <div class="website-block " data-url="{% url 'main:article_list_1' sites.id %}">

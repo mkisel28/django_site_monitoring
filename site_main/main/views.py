@@ -181,7 +181,7 @@ def api_article_list(request, website_id):
     articles = Article.objects.filter(website_id=website_id).order_by(
         "-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
 
-    # Замена заголовка на переведенный (если он существует)
+
     articles = create_articles(articles)[::-1]
     return JsonResponse({'articles': list(articles)})
 
@@ -348,19 +348,19 @@ def test(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Затем примените эти даты для фильтрации ваших статей:
 
-    # Если указан `country_code`, фильтруем по стране
+
+
     if country_code:
         country = get_object_or_404(Country, code=country_code)
         articles = Article.objects.filter(website__country=country)
-    # Если указан `website_id`, фильтруем по сайту
+
     elif website_id:
         articles = Article.objects.filter(website_id=website_id)
-    # Если указан `live`, возвращаем все статьи
+
     elif live:
         articles = Article.objects.all()
-    # Иначе возвращаем статьи из избранных стран пользователя
+
     else:
         favourite_countries = request.user.favorite_countries.all()
         articles = Article.objects.filter(
@@ -379,11 +379,11 @@ def test(request):
         articles = articles.filter(published_at__gte=start_date)
     if end_date:
         articles = articles.filter(published_at__lte=end_date)
-    # Если указан `only_favorites`, фильтруем только избранные
+
     if only_favorites:
         articles = articles.filter(website__favorited_by=request.user)
 
-    # Сортировка и выборка
+
     articles = articles.order_by("-published_at").values(
         'id', 'title', 'title_translate', 'url', 'published_at', 'website__name', 'website__id', 'website__country__name', 'is_favorite'
     )[:100]

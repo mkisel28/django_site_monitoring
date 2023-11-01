@@ -21,7 +21,6 @@ class IgnoredURL(models.Model):
     def __str__(self):
         return self.base_url
 
-  # чтобы убедиться, что одно и то же слово не будет отслеживаться пользователем более одного раза
 
 
 class Country(models.Model):
