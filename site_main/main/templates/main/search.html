@@ -1,0 +1,61 @@
+{% extends "main/static/base.html" %}
+{% load static %}
+{% block content %}
+
+<h1>Поиск по запросу: {{ text }}</h1>
+{% if selected_countries %}
+<h2>Найдено статей: {{ total_articles }}<br />
+  Для стран: {{ selected_countries }}
+</h2>
+{% else %}
+<h2>Найдено статей: {{ total_articles }}</h2>
+{% endif %}
+
+<div class="form-search">
+<form method="get" action="{% url 'main:search' %}">
+  <!-- Checkbox'ы для выбора стран -->
+  <fieldset>
+      <legend>Выберите страны:</legend>
+      {% for country in countries %}
+          <input type="checkbox" name="countries" id="country_{{ country.code }}" value="{{ country.code }}">
+          <label for="country_{{ country.code }}">{{ country.name }}</label><br>
+      {% endfor %}
+  </fieldset>
+  
+
+  
+
+  <div class="col-3 input-effect">
+    <input class="effect-20" type="text" name="search" id="search"  >
+      <label for="search">Поиск:</label>
+      <span class="focus-border">
+        <i></i>
+      </span>
+      
+  </div>
+  <input type="submit" value="Поиск">
+
+
+</form>
+</div>
+
+<div class="website-block">
+    <ul>
+    {% for article in articles %}
+        <li>
+            <div class="website-block"> 
+              <div class="country">{{ article.website__country__name }}</div> 
+                <div class="article-title">
+                    <a href="{{ article.url }}">{{ article.title }}</a>
+                </div>
+                <div class="article-date">
+                  <span class="publish-date"> {{ article.website__name }} </span>
+                    <span class="publish-date"> {{ article.published_at }} </span>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

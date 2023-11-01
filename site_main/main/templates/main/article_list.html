@@ -1,0 +1,30 @@
+{% extends "main/static/base.html" %}
+{% load static %}
+{% block content %}
+<h1>Articles</h1>
+<div class="website-block">
+  <ul>
+  {% for article in articles %}
+      <li>
+        <div class="website-block"> 
+          <div class="article-title">
+            <a href="{{ article.url }}">{{ article.title }}</a>
+          </div>
+          <div class="article-date">
+            <span class="publish-date"> {{ article.published_at }} </span>
+          </div>
+        </div>
+        
+      </li>
+  {% endfor %}
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+    {% endblock %}

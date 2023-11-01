@@ -1,0 +1,59 @@
+INFO 2023-11-01 06:23:47,451 controller | [48] Начал парсинг сайта: The Guardian » Poland
+INFO 2023-11-01 06:23:47,453 controller | [19] Начал парсинг сайта: tejarat online
+INFO 2023-11-01 06:23:47,454 controller | [10] Начал парсинг сайта: foxnews
+INFO 2023-11-01 06:23:47,454 controller | [17] Начал парсинг сайта: IRNA
+INFO 2023-11-01 06:23:47,455 controller | [37] Начал парсинг сайта: Global News
+INFO 2023-11-01 06:23:47,456 controller | [22] Начал парсинг сайта: Hamshahri Online
+INFO 2023-11-01 06:23:47,457 controller | [13] Начал парсинг сайта: times of israel
+INFO 2023-11-01 06:23:47,459 controller | [41] Начал парсинг сайта: The First News
+INFO 2023-11-01 06:23:47,461 controller | [40] Начал парсинг сайта: E-International Relations
+INFO 2023-11-01 06:23:47,462 controller | [15] Начал парсинг сайта: FARS NEWS
+INFO 2023-11-01 06:23:47,463 controller | [24] Начал парсинг сайта: Al-Watan
+INFO 2023-11-01 06:23:47,464 controller | [12] Начал парсинг сайта: jpost
+INFO 2023-11-01 06:23:47,466 controller | [18] Начал парсинг сайта: Mehr News
+INFO 2023-11-01 06:23:47,467 controller | [21] Начал парсинг сайта: Donya-e-Eqtesad
+INFO 2023-11-01 06:23:47,469 controller | [20] Начал парсинг сайта: Khabar Online
+INFO 2023-11-01 06:23:47,496 controller | [26] Начал парсинг сайта: Syria Steps
+INFO 2023-11-01 06:23:47,500 controller | [30] Начал парсинг сайта: YNET
+INFO 2023-11-01 06:23:47,501 controller | [2] Начал парсинг сайта: LENTA
+INFO 2023-11-01 06:23:47,502 controller | [6] Начал парсинг сайта: CNN - WORD
+INFO 2023-11-01 06:23:47,503 controller | [8] Начал парсинг сайта: CNN - AFRICA
+INFO 2023-11-01 06:23:53,196 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:53,647 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:53,811 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:23:53,950 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:53,960 controller | Error saving to database: User has no userprofile.
+ERROR 2023-11-01 06:23:54,229 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:23:54,330 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:54,473 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:54,597 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:54,647 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:54,800 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:23:54,980 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:54,997 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:23:55,028 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:55,320 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:23:55,525 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:55,874 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:55,969 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:56,068 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:56,239 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:23:56,477 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:56,815 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:56,985 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:57,322 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:57,518 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:57,521 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:57,581 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:57,953 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:23:58,317 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:58,477 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:58,481 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:23:58,592 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:58,838 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:23:59,278 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:23:59,458 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:24:00,846 models | Попытка перевода №1. Успешно.
+INFO 2023-11-01 06:24:02,876 models | Попытка перевода №1. Успешно.
+ERROR 2023-11-01 06:24:03,053 controller | Error saving to database: User has no userprofile.
+INFO 2023-11-01 06:24:06,968 models | Попытка перевода №1. Успешно.

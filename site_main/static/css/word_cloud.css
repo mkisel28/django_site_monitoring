@@ -1,0 +1,77 @@
+.word-cloud {
+  padding: 20px;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.word {
+  display: inline-block;
+  margin: 3px;
+  padding: 5px 10px;
+  background-color: #00274f;
+  color: #ecf0f1;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  cursor: pointer;
+}
+.website-block.articles-list ul.websites {
+  max-height: 400px; /* или любое другое значение, которое вы предпочитаете */
+  overflow-y: auto; /* автоматическая полоса прокрутки */
+}
+
+/* Основной стиль для полосы прокрутки */
+.website-block.articles-list ul.websites::-webkit-scrollbar {
+  width: 10px; /* ширина вертикальной полосы прокрутки */
+}
+
+/* Стиль для ползунка прокрутки */
+.website-block.articles-list ul.websites::-webkit-scrollbar-thumb {
+  background-color: #5c5c5c; /* цвет ползунка */
+  border-radius: 5px; /* скругление углов */
+}
+
+/* Стиль при наведении курсора на ползунок */
+.website-block.articles-list ul.websites::-webkit-scrollbar-thumb:hover {
+  background-color: #000000; /* цвет ползунка при наведении */
+}
+
+/* Стиль для трека (пути), по которому двигается ползунок */
+.website-block.articles-list ul.websites::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* цвет фона трека */
+  border-radius: 5px; /* скругление углов */
+}
+
+
+.word:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 54%);
+  background-color: #030022;
+}
+
+.word.small { font-size: 14px; }
+.word.medium { font-size: 18px; }
+.word.large { font-size: 24px; }
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.word {
+  animation: pulse 2s infinite;
+}
+
+.articles-list .websites {
+  gap: 0px;
+  margin-top: 10px;
+}
+
+.articles-list   {
+  gap: 0px;
+  margin-top: 10px;
+}

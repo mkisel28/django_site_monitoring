@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+</head>
+<header>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="{% url 'main:search' %}">Поиск</a></li>
+            <li><a href="{% url 'main:website_list' %}">Мониторинг</a></li>
+            <li><a href="{% url 'main:country_monitoring' %}">Мониторинг по странам</a></li>
+            <li><a href="{% url 'main:live_all' %}">LIVE</a></li>
+            <li><a href="{% url 'users:manage_tracked_words' %}">Управление</a></li>
+        </ul>
+    </nav>
+  </header>
+<body class="bg-2">
+
+    {% block content %}
+    {% endblock %}
+
+    
+</body>
+</html>

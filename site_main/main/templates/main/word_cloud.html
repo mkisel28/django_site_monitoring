@@ -1,0 +1,101 @@
+{% load static %}
+
+<div class="word-cloud">
+  <h1>Облако тегов</h1>
+    {% for word in words %}
+    <span class="word {{ word.frequency }}" data-word-id="{{ word.id }}">{{ word.text }}</span>
+    {% endfor %}
+</div>
+
+<div class="website-block articles-list" style="display: none;">
+    <ul class="websites"></ul>
+</div>
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/word_cloud.css' %}">
+
+<script>
+  function formatDateTime(dateTimeStr) {
+    var date = new Date(dateTimeStr);
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var year = date.getFullYear();
+    var hours = String(date.getHours()).padStart(2, '0');
+    var minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}.${month}.${year} г. ${hours}:${minutes}`;
+}
+    document.addEventListener("DOMContentLoaded", function() {
+        const words = document.querySelectorAll('.word');
+        const articlesListDiv = document.querySelector('.articles-list');
+        const articlesList = articlesListDiv.querySelector('ul');
+
+        let lastClickedWord = null; 
+
+        words.forEach(word => {
+            word.addEventListener('click', function() {
+                            // Если последнее нажатое слово и текущее слово совпадают, скрываем список и выходим
+              if (lastClickedWord === word) {
+                  articlesListDiv.style.display = 'none';
+                  lastClickedWord = null;
+                  return;
+              }
+  
+              lastClickedWord = word;  
+                // Получаем статьи для слова
+                const wordId = word.getAttribute('data-word-id');
+                fetch(`/api/articles_for_word/${wordId}/`).then(response => {
+                    return response.json();
+                  }).then(data => {
+                    articlesList.innerHTML = '';
+                    data.articles.forEach(article => {
+                        const li = document.createElement('li');
+                        li.setAttribute('data-id', article.id);
+                        
+                        const websiteUrlDiv = document.createElement('div');
+                        websiteUrlDiv.classList.add('website-url');
+    
+
+                        const articleTitleDiv = document.createElement('div');
+                        articleTitleDiv.classList.add('article-title');
+                        const aTitle = document.createElement('a');
+                        aTitle.href = article.url;
+                        aTitle.textContent = article.title;
+                        articleTitleDiv.appendChild(aTitle);
+    
+                        const articleDateDiv = document.createElement('div');
+                        articleDateDiv.classList.add('article-date');
+                        const spanWebsite = document.createElement('span');
+                        spanWebsite.classList.add('publish-date');
+                        var favoriteIcon = article.is_favorite ?
+                        `<a href="#" class="toggle-favorite" data-action="/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
+                        `<a href="#" class="toggle-favorite" data-action="/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
+
+                        spanWebsite.innerHTML = favoriteIcon + ' ' + article.website__name;
+                        const spanDate = document.createElement('span');
+                        spanDate.classList.add('publish-date');
+                        spanDate.textContent = formatDateTime(article.published_at); 
+                        const spanCountry = document.createElement('span');
+                        
+                        spanCountry.classList.add('publish-date');
+                        spanCountry.textContent = article.website__country__name;; 
+
+                        // Убедитесь, что у вас есть поле published_at в вашем API ответе
+    
+                        articleDateDiv.appendChild(spanWebsite);
+                        articleDateDiv.appendChild(spanDate);
+                        articleDateDiv.appendChild(spanCountry);
+    
+                        websiteUrlDiv.appendChild(articleTitleDiv);
+                        websiteUrlDiv.appendChild(articleDateDiv);
+    
+                        li.appendChild(websiteUrlDiv);
+    
+                        articlesList.appendChild(li);
+                    });
+                    articlesListDiv.style.display = 'block';
+                });
+            });
+        });
+    });
+
+</script>

@@ -1,0 +1,28 @@
+{% extends "main/static/base.html" %}
+
+
+{% load static %}
+
+
+
+{% block content %}
+<div class="form-container">
+    
+    <div class="image-container" style="background-image: url({% static 'file/login.jpg' %})">
+        <div class="overlay">
+            <h1>Регистрация</h1>
+            <p>Уже зарегистрированы? <a href="{% url 'users:login' %}">Войти</a></p>
+        </div>
+
+
+    </div>
+
+    <div class="form-group">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
