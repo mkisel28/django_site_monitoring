@@ -50,6 +50,10 @@ def all_favourite_country(request):
     """
     return render(request, 'main/all_favourite_country.html')
 
+import pymorphy2
+
+morph = pymorphy2.MorphAnalyzer()
+
 
 @login_required(login_url="/")
 def search(request):
@@ -59,11 +63,17 @@ def search(request):
     search_post = request.GET.get('search', '').lower().split()
     country_filters = request.GET.getlist(
         'countries')  # Получаем список выбранных стран
-
     q_objects = Q()
     for word in search_post:
+        normalized_word = morph.parse(word)[0].normal_form
         q_objects &= Q(title__icontains=word) | Q(
-            title_translate__icontains=word)
+            title_translate__icontains=word)| Q(
+            normalized_title__icontains=word)| Q(
+            title__icontains=normalized_word)| Q(
+            title_translate__icontains=normalized_word)| Q(
+            normalized_title__icontains=normalized_word)
+
+        
 
     articles = Article.objects.filter(q_objects)
 

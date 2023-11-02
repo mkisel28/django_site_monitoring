@@ -14,16 +14,16 @@ from django.contrib.auth.models import User
 logger = logging.getLogger("models")
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE,  db_index=True)
     telegram_chat_id = models.CharField(max_length=255, null=True, blank=True)
     telegram_notifications = models.BooleanField(default=False)
+    
     class Meta:
         app_label = 'main'
 
 class IgnoredURL(models.Model):
-    base_url = models.URLField(verbose_name="Base URL to Ignore")
-    users = models.ManyToManyField(User, related_name="ignored_urls", blank=True)  # добавлено
+    base_url = models.URLField(verbose_name="URL для игнорирования статей")
+    users = models.ManyToManyField(User, related_name="ignored_urls", blank=True)
 
     def __str__(self):
         return self.base_url
@@ -34,7 +34,7 @@ class IgnoredURL(models.Model):
 
 class Country(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название страны")
-    code = models.CharField(max_length=10, verbose_name="Код страны", unique=True)
+    code = models.CharField(max_length=10, verbose_name="Код страны", unique=True, db_index=True)
     favorited_by = models.ManyToManyField(User, related_name="favorite_countries", blank=True)
 
     def __str__(self):
@@ -47,10 +47,11 @@ class Country(models.Model):
 class Website(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название сайта")
     base_url = models.URLField(verbose_name="Базовый URL")
-    sitemap_url = models.URLField(verbose_name="SITEMAP URL", default=None, null=True, blank=True)
+    sitemap_url = models.URLField(verbose_name="Ссылка на SITEMAP", default=None, null=True, blank=True)
     last_scraped = models.DateTimeField(null=True, blank=True, verbose_name="Последний раз обновлено")
     language = models.CharField(max_length=10, verbose_name="Язык сайта", default="ru")
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Страна")
+    favorited_by = models.ManyToManyField(User, related_name="favorite_websites", blank=True) 
 
     def __str__(self):
         return self.name
@@ -60,12 +61,12 @@ class Website(models.Model):
 
 
 class Article(models.Model):
-    website = models.ForeignKey(Website, on_delete=models.CASCADE, related_name="articles", verbose_name="Сайт")
-    title = models.CharField(max_length=1000, verbose_name="Название статьи")
+    website = models.ForeignKey(Website, on_delete=models.CASCADE, related_name="articles", verbose_name="Сайт", db_index=True)
+    title = models.TextField(verbose_name="Название статьи")
     url = models.URLField(max_length=1000, unique=True, verbose_name="Ссылка на статью")
-    published_at = models.DateTimeField(verbose_name="Дата публикации")
-    title_translate = models.CharField(max_length=1000, verbose_name="Перевод названия", blank=True, null=True)
-    normalized_title = models.CharField(max_length=1000, verbose_name="Название статьи в начальной форме", blank=True, null=True)
+    published_at = models.DateTimeField(verbose_name="Дата публикации", db_index=True)
+    title_translate = models.TextField(verbose_name="Перевод названия", blank=True, null=True)
+    normalized_title = models.TextField(verbose_name="Название статьи в начальной форме", blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -139,14 +140,27 @@ class Word(models.Model):
 
 
 class TrackedWord(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tracked_words")
-    keyword = models.CharField(max_length=255, verbose_name="Отслеживаемое слово")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tracked_words",  db_index=True)
+    keyword = models.CharField(max_length=255, verbose_name="Отслеживаемое слово",db_index=True)
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Время добавления")
 
     class Meta:
         unique_together = ('user', 'keyword')
         app_label = 'main'
-
+        
+    def save(self, *args, **kwargs):
+        # Сначала сохраняем слово
+        super(TrackedWord, self).save(*args, **kwargs)
+        
+        # Проверяем все статьи на наличие этого слова
+        articles_with_word = Article.objects.filter(
+            Q(title__icontains=self.keyword) |
+            Q(title_translate__icontains=self.keyword) |
+            Q(normalized_title__icontains=self.keyword)
+        )
+        # Создаем записи в TrackedWordMention для каждой статьи, содержащей это слово
+        for article in articles_with_word:
+            TrackedWordMention.objects.get_or_create(word=self, article=article, mentioned_at= article.published_at)
 
 class TrackedWordMention(models.Model):
     word = models.ForeignKey(TrackedWord, on_delete=models.CASCADE, related_name="mentions")
