@@ -89,8 +89,7 @@ INSTALLED_APPS = [
 
 django.setup()
 
-from newspaper import Article
-article = Article(url)
+
 from controller import main, top_words
 
 

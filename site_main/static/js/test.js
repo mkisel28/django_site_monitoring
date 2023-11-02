@@ -42,7 +42,7 @@ $(document).ready(function() {
 }
 
 $('#startDate, #endDate').on('change', function() {
-  updateArticlesWithClear();  // или updateArticles(), в зависимости от вашего кода
+  updateArticlesWithClear();   
 });
 
   function updateArticlesWithClear() {
@@ -133,7 +133,7 @@ $('#startDate, #endDate').on('change', function() {
           }
       });
   }
-  $('#showOnlyFavorites').change(updateArticlesWithClear); // обновите статьи при изменении состояния чекбокса
+  $('#showOnlyFavorites').change(updateArticlesWithClear); // обновление статьи при изменении состояния чекбокса
   updateArticles();
   setInterval(updateArticles, 15000);  
 

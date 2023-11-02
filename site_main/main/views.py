@@ -1,7 +1,7 @@
 from django.db.models import OuterRef, Exists
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
-from .models import Website, Country, Article, Word, Configuration
+from .models import Website, Country, Article, Word, Configuration, TrackedWord, TrackedWordMention
 from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
@@ -124,13 +124,29 @@ def country_monitoring(request):
         favorited_by=request.user).order_by('country__id')
     other_sites = Website.objects.exclude(
         favorited_by=request.user).order_by('country__id')
+    
     words = Word.objects.order_by('-id')[:TOP_COUNT]
+
+
+    tracked_words = TrackedWord.objects.filter(user=request.user)
+
+    # Создаем список словарей с каждым словом и его количеством упоминаний
+    tracked_word_with_counts = []
+    for tracked_word in tracked_words:
+        mentions_count = TrackedWordMention.objects.filter(word=tracked_word).count()
+        tracked_word_with_counts.append({
+            'word': tracked_word,
+            'count': mentions_count
+        })
+
+
     context = {
         'favorite_countries': favorite_countries,
         'other_countries': other_countries,
         'favorite_sites': favorite_sites,
         'other_sites': other_sites,
-        'words': words[::-1]
+        'words': words[::-1],
+        "tracked_word_with_counts": tracked_word_with_counts
     }
 
     return render(request, 'main/country_monitoring.html', context)
@@ -271,7 +287,7 @@ def articles_for_word(request, word_id):
              'website__country__name',
              'published_at',
              'is_favorite')
-    articles = create_articles(articles)
+    articles = create_articles(articles)[::-1]
     return JsonResponse({'articles': list(articles)})
 
 

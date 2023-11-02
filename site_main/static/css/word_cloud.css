@@ -1,5 +1,5 @@
 .word-cloud {
-  padding: 20px;
+  padding: 10px;
   text-align: center;
   background-color: #ffffff;
   border-radius: 10px;
@@ -9,8 +9,8 @@
 
 .word {
   display: inline-block;
-  margin: 3px;
-  padding: 5px 10px;
+
+  padding: 3px 7px;
   background-color: #00274f;
   color: #ecf0f1;
   border-radius: 10px;
@@ -73,5 +73,53 @@
 
 .articles-list   {
   gap: 0px;
+
+}
+
+.widget.articles-list .websites {
+  gap: 0px;
   margin-top: 10px;
+}
+.widget .website-block{
+  max-width: 30%;
+  min-width: 30%;
+  
+}
+
+
+
+.word-cloud ul {
+  list-style-type: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+
+.word-cloud li {
+  display: inline-block;
+}
+
+.word {
+  display: inline-block;
+  padding: 3px 7px;
+  background-color: #00274f;
+  color: #ecf0f1;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  text-decoration: none; 
+}
+
+.word .count {
+  color: #ecf0f1; 
+  margin-left: 5px;
+  font-weight: bold;
+}
+
+.word:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 54%);
+  background-color: #030022;
 }

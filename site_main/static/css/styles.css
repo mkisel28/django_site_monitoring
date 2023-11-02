@@ -271,13 +271,35 @@ header {
 
 
 
+.widget.all {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  max-width: 100%;
+
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  overflow: hidden;
+  background-color: #ffffff;
+  box-shadow: 0 0 20px 6px #0000002c;
+
+}
+@media (max-width: 980px){
+  .widget.all {
+      flex-flow: wrap;
+      text-align: center;
+      align-content: center;
+      align-items: center;
+  }
+}
 
 
 
 
 
 
-
+/*РЕГИСТРАЦИЯ */
 
 
 

@@ -1,6 +1,8 @@
 /.vscode
 /debug.log
 /debug1.log
-***.pyc
+**/*.pyc
+**/__pycache__/
 site_main/main/__pycache__/views.cpython-39.pyc
 site_main/main/__pycache__/models.cpython-39.pyc
+.pyc

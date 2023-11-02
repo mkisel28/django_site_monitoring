@@ -1,10 +1,17 @@
 {% load static %}
 
 <div class="word-cloud">
-  <h1>Облако тегов</h1>
+  <span>Облако тегов</span>
+  <ul>
     {% for word in words %}
-    <span class="word {{ word.frequency }}" data-word-id="{{ word.id }}">{{ word.text }}</span>
+    <li>
+        <a href="#" class="word {{ word.frequency }}" data-word-id="{{ word.id }}">
+            {{ word.text }}
+        </a>
+    
+    <li>
     {% endfor %}
+    </ul>
 </div>
 
 <div class="website-block articles-list" style="display: none;">

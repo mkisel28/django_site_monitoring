@@ -1,8 +1,10 @@
 {% extends "main/static/base.html" %}
 {% load static %}
 {% block content %}
+<div class="widget all">
 {% include "main/word_cloud.html" %}
-
+{% include "main/TrackedWord.html" %}
+</div>
     <h1>Страны</h1>
     <div class="favorites-container">
       <h2>Избранные страны</h2>

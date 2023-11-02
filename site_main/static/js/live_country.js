@@ -94,7 +94,7 @@ $(document).ready(function() {
           }
       });
   }
-  $('#showOnlyFavorites').change(updateArticlesWithClear); // обновите статьи при изменении состояния чекбокса
+  $('#showOnlyFavorites').change(updateArticlesWithClear); 
   updateArticles();
   setInterval(updateArticles, 15000);  
 

@@ -1,0 +1,14 @@
+{% load static %}
+<div class="word-cloud">
+  <span>Отслеживаемые слова</span>
+  <ul>
+    {% for item in tracked_word_with_counts %}
+      <li>
+        <a href="#" class="word" data-word-id="{{ item.word.id }}">
+          {{ item.word.keyword }} 
+          <span class="count">({{ item.count }})</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
