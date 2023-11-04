@@ -5,7 +5,7 @@
     <h1>Websites</h1>
     <div class="websites">
         {% for website in websites %}
-            <div class="website-block" data-api="{% url 'main:api_article_list' website.id %}" data-url="{% url 'main:article_list_1' website.id %}">
+            <div class="website-block"  data-id ="{{website.id}}" data-url="{% url 'main:website_articles' website.id %}">
                 <div class="country">{{ website.country.name }}</div> 
                 {% if website in request.user.favorite_websites.all %}
                 <a href="#" class="toggle-favorite" data-action="{% url 'main:remove_favorite' website.id %}"><i class="fas fa-star"></i></a> <!-- Звезда для избранных -->
@@ -31,3 +31,5 @@
 
 
       {% endblock %}
+{% comment %} 
+      data-api="{% url 'main:api_article_list' website.id %}" {% endcomment %}

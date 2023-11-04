@@ -1,0 +1,24 @@
+<div class="card mt-4">
+  <div class="card-header cardToggle">
+      <h3>Управление отслеживаемыми словами</h3>
+      <span class="float-right">Скрыть &#9650;</span> 
+
+  </div>
+  <div class="card-body" style="display: ;">
+      <form id="addWordForm" method="post" class="mb-3">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-success">Добавить слово</button>
+      </form>
+
+      <ul id="wordList" class="list-group">
+          {% for item in words_with_counts %}
+          <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ item.word.id }}">
+              {{ item.word.keyword }}
+              <span class="badge badge-primary badge-pill">{{ item.count }}</span>
+              <button class="btn btn-danger btn-sm deleteWord">Удалить</button>
+          </li>
+          {% endfor %}
+      </ul>
+  </div>
+</div>

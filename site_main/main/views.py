@@ -6,10 +6,23 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from typing import List, Dict, Any
+from datetime import datetime, timedelta
 
+# from channels.layers import get_channel_layer
+# from asgiref.sync import async_to_sync
 
-def index(request):
-    return render(request, 'main/index.html')
+# def new_post_published(post):
+#     channel_layer = get_channel_layer()
+#     async_to_sync(channel_layer.group_send)(
+#         "post_notifications", {
+#             "type": "post_notification",
+#             "message": f"A new post titled '{post}' has been published!"
+#         }
+#     )
+
+# def index(request):
+#     new_post_published("Test post")
+#     return render(request, 'main/index.html')
 
 
 def create_articles(articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -172,7 +185,6 @@ def api_country_articles(request):
     country_code = request.GET.get('country')
     only_favorites = request.GET.get('only_favorites')
 
-    print(country_code)
     country = get_object_or_404(Country, code=country_code)
     articles = Article.objects.annotate(
         is_favorite=Exists(
@@ -197,20 +209,32 @@ def api_country_articles(request):
 
     return JsonResponse(data)
 
+import time
 
 @login_required(login_url="/")
-def api_article_list(request, website_id):
+def api_article_list(request):
     """
     API-точка, которая возвращает список статей для конкретного сайта по его ID.
     Главная страница HTML: website_list.html
     """
-    articles = Article.objects.filter(website_id=website_id).order_by(
-        "-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
+    # articles = Article.objects.filter(website_id=website_id).order_by(
+    #     "-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
 
 
-    articles = create_articles(articles)[::-1]
-    return JsonResponse({'articles': list(articles)})
+    # articles = create_articles(articles)[::-1]
+    # return JsonResponse({'articles': list(articles)})
 
+    website_ids = request.GET.getlist('website_ids[]')
+
+    all_articles = {}
+
+    for website_id in website_ids:
+
+        articles = Article.objects.filter(website_id=website_id).order_by("-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
+        all_articles[website_id] = create_articles(articles)[::-1]
+
+
+    return JsonResponse({'websites': all_articles})
 
 @login_required(login_url="/")
 def get_favorite_countries_articles_api(request):
@@ -267,11 +291,48 @@ def get_all_live_articles_api(request):
     articles = create_articles(articles)[::-1]
     return JsonResponse({'articles': list(articles)})
 
-
+##########ОСТАЛЬНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
-def articles_for_word(request, word_id):
-    word = get_object_or_404(Word, id=word_id)
-    articles = word.articles.all().annotate(
+def articles_for_related_data(request, data_id, data_type):
+    date_filter = request.GET.get('date')
+    count_filter = request.GET.get('count')
+
+    countries_filter = [int(x) for x in request.GET.get('countries').split(",") if x] if request.GET.get('countries') else []
+
+    
+    websites_filter = [int(x) for x in request.GET.get('websites').split(",") if x] if request.GET.get('websites') else []
+    if data_type == "word":
+        word = get_object_or_404(Word, id=data_id)
+        base_query = word.articles.all()
+    elif data_type == "track":
+        tracked_word = get_object_or_404(TrackedWord, id=data_id)
+        base_query = Article.objects.filter(mentions__word=tracked_word)
+    else:
+        return JsonResponse({'error': 'Invalid data type'}, status=400)
+    
+
+    if date_filter:
+        today = datetime.today().date()
+        if date_filter == "today":
+            base_query = base_query.filter(published_at__gte=today)
+
+        elif date_filter == "week":
+            week_ago = today - timedelta(days=7)
+            base_query = base_query.filter(published_at__range=(week_ago, today))
+
+        elif date_filter == "month":
+            month_ago = today - timedelta(days=30)
+            base_query = base_query.filter(published_at__range=(month_ago, today))
+
+    if countries_filter:
+        base_query = base_query.filter(website__country__id__in=countries_filter)
+
+    if websites_filter:
+        base_query = base_query.filter(website__id__in=websites_filter)
+
+    # Применение аннотаций и возвращение результатов
+    count_filter = int(count_filter) if count_filter else 1000
+    articles = base_query.annotate(
         is_favorite=Exists(
             Website.objects.filter(
                 id=OuterRef('website_id'),
@@ -286,13 +347,18 @@ def articles_for_word(request, word_id):
              'website__id',
              'website__country__name',
              'published_at',
-             'is_favorite')
+             'is_favorite')[:count_filter]
+    
     articles = create_articles(articles)[::-1]
+    if len(articles) == 0:
+
+        return JsonResponse({'error': 'Ничего не найдено'})
+
     return JsonResponse({'articles': list(articles)})
 
 
 @login_required(login_url="/")
-def article_list_1(request, website_id):
+def website_articles(request, website_id):
     """
     Отображает страницу со списком статей для конкретного сайта по его ID.
     """
@@ -361,21 +427,23 @@ def remove_country_from_favorites_api(request, country_code):
         return JsonResponse({"status": "error", "message": str(e)})
 
 
+
+
+
+
+##########ОСТАЛЬНАЯ API-ТОЧКИ############
+
 @login_required(login_url="/")
 def test(request):
     """
     Объединенная API-точка для получения статей на основе различных критериев.
     """
-    print(request.user)
     country_code = request.GET.get('country')
     website_id = request.GET.get('website_id')
     only_favorites = request.GET.get('only_favorites')
     live = request.GET.get('live')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
-
-
-
 
     if country_code:
         country = get_object_or_404(Country, code=country_code)

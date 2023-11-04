@@ -13,36 +13,39 @@ $(document).ready(function() {
 
 
         function updateArticles() {
-            $('.website-block').each(function() {
-                var $block = $(this);
-                var updateUrl = $block.data('api');
+            // Получаем все website IDs сразу
+            var websiteIds = $('.website-block').map(function() {
+                return $(this).data('id'); // Извлекаем ID напрямую из data-id
+            }).get();
 
-                $.ajax({
-                    url: updateUrl,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
+            // Отправляем один запрос с этими IDs
+            $.ajax({
+                url: "/api/websites/", // Укажите здесь путь к вашему новому API
+                type: 'GET',
+                data: { 'website_ids[]': websiteIds },
+                dataType: 'json',
+                success: function(data) {
+                    $('.website-block').each(function() {
+                        var $block = $(this);
+                        var websiteId = $block.data('id').toString(); // Преобразуем ID в строку для доступа к свойствам объекта
+                        var articles = data.websites[websiteId];
                         var $list = $block.find('#website-list');
-
-                        // Получаем список текущих ID статей
+                        
+                        // Теперь мы можем использовать похожую логику на ту, что у вас уже есть, для обновления статей для каждого сайта
                         var currentIds = $list.find('li').map(function() {
                             return $(this).data('id');
                         }).get();
 
-                        // Если список пуст, то сразу обновляем
                         if (currentIds.length === 0) {
-                            addArticles($list, data.articles);
+                            addArticles($list, articles);
                             return;
                         }
 
-                        // Фильтруем новые статьи
-                        var newArticles = data.articles.filter(function(article) {
+                        var newArticles = articles.filter(function(article) {
                             return !currentIds.includes(article.id);
                         });
 
-                        // Если есть новые статьи
                         if (newArticles.length) {
-                            // Удаляем статьи, которые больше не умещаются в новую последовательность
                             var excessArticles = $list.find('li').slice(3 - newArticles.length);
                             excessArticles.fadeOut(400, function() {
                                 $(this).remove();
@@ -52,8 +55,8 @@ $(document).ready(function() {
                                 addArticles($list, newArticles);
                             }, 1000);
                         }
-                    }
-                });
+                    });
+                }
             });
         }
 
@@ -82,3 +85,50 @@ $(document).ready(function() {
       setInterval(updateArticles, 15000); // обновляем каждые 10 секунд
   });
   
+
+
+  
+//   function updateArticles() {
+//     $('.website-block').each(function() {
+//         var $block = $(this);
+//         var updateUrl = $block.data('api');
+
+//         $.ajax({
+//             url: updateUrl,
+//             type: 'GET',
+//             dataType: 'json',
+//             success: function(data) {
+//                 var $list = $block.find('#website-list');
+
+//                 // Получаем список текущих ID статей
+//                 var currentIds = $list.find('li').map(function() {
+//                     return $(this).data('id');
+//                 }).get();
+
+//                 // Если список пуст, то сразу обновляем
+//                 if (currentIds.length === 0) {
+//                     addArticles($list, data.articles);
+//                     return;
+//                 }
+
+//                 // Фильтруем новые статьи
+//                 var newArticles = data.articles.filter(function(article) {
+//                     return !currentIds.includes(article.id);
+//                 });
+
+//                 // Если есть новые статьи
+//                 if (newArticles.length) {
+//                     // Удаляем статьи, которые больше не умещаются в новую последовательность
+//                     var excessArticles = $list.find('li').slice(3 - newArticles.length);
+//                     excessArticles.fadeOut(400, function() {
+//                         $(this).remove();
+//                     });
+
+//                     setTimeout(function() {
+//                         addArticles($list, newArticles);
+//                     }, 1000);
+//                 }
+//             }
+//         });
+//     });
+// }

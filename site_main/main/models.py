@@ -36,7 +36,6 @@ class Country(models.Model):
         return self.name
     
 
-         
 class Website(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название сайта")
     base_url = models.URLField(verbose_name="Базовый URL")
@@ -114,6 +113,7 @@ class Article(models.Model):
 
 
             return article
+        
 
 class Word(models.Model):
     text = models.CharField(max_length=100, unique=False, verbose_name="Текст слова")
@@ -173,8 +173,28 @@ class Configuration(models.Model):
         return self.name
 
 
-
 def translate_text(from_lang, to_translate):
     translated_text = GoogleTranslator(source=from_lang, target='ru').translate(to_translate)
     return translated_text
 
+
+
+
+
+
+
+
+
+
+# from django.db.models.signals import post_save
+# from django.dispatch import receiver
+# import requests
+# @receiver(post_save, sender=Article)
+# def notify_project_b(sender, instance, **kwargs):
+#     print("notify_project_b")
+#     url = "http://127.0.0.1:8000/api/notification/"
+#     data = {
+#         'message': f"Страна {instance.title} ({instance.url}) была обновлена или добавлена."
+#     }
+#     response = requests.post(url, data=data)
+         

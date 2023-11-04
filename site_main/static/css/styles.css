@@ -16,17 +16,20 @@ h1 {
 
 .websites {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
 }
 
+.far, .fas{
+  padding: 5px;
+}
 
 
 
 .website-block {
   position: relative; 
   background-color: #fff;
-  padding: 15px;
+  /* padding: 15px; */
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   cursor: pointer;
@@ -273,7 +276,7 @@ header {
 
 .widget.all {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   max-width: 100%;
 
@@ -292,9 +295,17 @@ header {
       align-content: center;
       align-items: center;
   }
+  
 }
 
+.widget.all .websites{
+  grid-template: none;
 
+}
+.widget.all .website-url{
+  padding: 5px 15px 5px 15px ;
+
+}
 
 
 
@@ -624,3 +635,15 @@ input[type="text"]{font: 15px/24px "Lato", Arial, sans-serif; color: #333; width
   }
 
 
+.filters {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  margin: 0 auto;
+}
+.live{
+  padding: 10px;
+  align-items: center;
+  flex-direction: column;
+}

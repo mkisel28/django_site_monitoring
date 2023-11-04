@@ -1,0 +1,22 @@
+<div class="card">
+  <div class="card-header cardToggle">
+      <h3>Настройки оповещений в Telegram</h3>
+      <span class="float-right">Развернуть &#9660;</span> 
+  </div>
+  <div class="card-body"  style="display: none;">
+      <form id="telegramNotificationForm" method="post" action="{% url 'users:toggle_telegram_notifications' %}">
+          {% csrf_token %}
+          <div class="form-group">
+              <label for="telegram_chat_id">Chat ID или username:</label>
+              <input type="text" class="form-control" name="telegram_chat_id" id="telegram_chat_id" placeholder="Введите ваш Chat ID" title="Уникальный идентификатор чата, который вы получите после первого сообщения боту" value="{{ request.user.userprofile.telegram_chat_id }}">
+              <small class="form-text text-muted"><a href="https://t.me/username_to_id_bot" target="_blank">Получить ID можно тут</a></small>
+          </div>
+          <div class="form-check">
+              <input type="checkbox" class="form-check-input" name="telegram_notifications" id="telegram_notifications" {% if request.user.userprofile.telegram_notifications %}checked{% endif %}>
+              <label class="form-check-label" for="telegram_notifications">Получать уведомления в Telegram</label>
+              <small class="form-text text-muted"><a href="https://t.me/SpamSticker11111_bot" target="_blank">В первый раз нужно запустить Бота</a></small>
+          </div>
+          <input type="submit" class="btn btn-primary mt-3" value="Сохранить">
+      </form>
+  </div>
+</div>

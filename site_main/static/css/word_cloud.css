@@ -3,23 +3,12 @@
   text-align: center;
   background-color: #ffffff;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
 }
 
-.word {
-  display: inline-block;
 
-  padding: 3px 7px;
-  background-color: #00274f;
-  color: #ecf0f1;
-  border-radius: 10px;
-  font-size: 14px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-  cursor: pointer;
-}
 .website-block.articles-list ul.websites {
-  max-height: 400px; /* или любое другое значение, которое вы предпочитаете */
+  max-height: 436px; /* или любое другое значение, которое вы предпочитаете */
   overflow-y: auto; /* автоматическая полоса прокрутки */
 }
 
@@ -80,12 +69,21 @@
   gap: 0px;
   margin-top: 10px;
 }
+
+
 .widget .website-block{
-  max-width: 30%;
-  min-width: 30%;
+  max-width: 60%;
+  min-width: 60%;
   
 }
+@media (max-width: 980px){
 
+  .widget .website-block{
+    max-width: 100%;
+    min-width: 100%;
+    
+  }
+}
 
 
 .word-cloud ul {
@@ -122,4 +120,24 @@
   transform: scale(1.1);
   box-shadow: 0 4px 10px rgb(0 0 0 / 54%);
   background-color: #030022;
+}
+
+.website-block.articles-list {
+  display: flex;          /* делаем контейнер гибким */
+  justify-content: center; /* центрируем содержимое по горизонтали */
+  align-items: center;     /* центрируем содержимое по вертикали */
+  height: 100%;            /* необходимая высота (можно установить другое значение) */
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;           /* занимает всю доступную ширину родителя */
+}
+
+.websites .error {
+  display: grid;
+  grid-template-columns: none;
 }

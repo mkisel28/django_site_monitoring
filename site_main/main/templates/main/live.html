@@ -7,20 +7,21 @@
 <div class="live" id='live-tracking-page'> </div>
 
 <div class="website-block" >
-  <div class="checkbox-wrapper-34">
-    <input class='tgl tgl-ios' id='showOnlyFavorites' type='checkbox'>Отображать только избранные сайты
-    <label class='tgl-btn' for='showOnlyFavorites'></label>
+  <div class="filters live">
+    <div class="checkbox-wrapper-34">
+        <input class='tgl tgl-ios' id='showOnlyFavorites' type='checkbox'>Отображать только избранные сайты
+        <label class='tgl-btn' for='showOnlyFavorites'></label>
+    </div>
+    <div class="date-picker-wrapper">
+        <label for="startDate">Дата начала:</label>
+        <input type="date" id="startDate">
+        <label for="endDate">Дата конца:</label>
+        <input type="date" id="endDate">
+    </div>
   </div>
-  <div class="date-picker-wrapper">
-    <label for="startDate">Дата начала:</label>
-    <input type="date" id="startDate">
-    
-    <label for="endDate">Дата конца:</label>
-    <input type="date" id="endDate">
-</div>
-  <ul>
 
-  </ul>
+  <ul>  </ul>
+
 </div>
 {% comment %} <script src="{% static 'js/live_all.js' %}"  ></script> {% endcomment %}
 <script src="{% static 'js/test.js' %}"  ></script>
