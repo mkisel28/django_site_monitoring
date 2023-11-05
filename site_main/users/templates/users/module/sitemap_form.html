@@ -1,0 +1,14 @@
+<form id="sitemapForm">
+  <h4>Выберите Sitemap:</h4>
+  <select>
+  {% for sitemap in sitemaps %}
+      <div>
+        <option type="radio" name="sitemap_url" value="{{ sitemap.0 }}" id="sitemap_url">{{ sitemap.1}}</option>
+      </div>
+  {% endfor %}
+</select>
+  <div>
+      <input type="url" id="customSitemap" name="custom_sitemap_url" placeholder='Или введите свой Sitemap:'>
+  </div>
+  <button type="submit">Подтвердить выбор Sitemap</button>
+</form>

@@ -6,7 +6,9 @@ def clean_html_entities(input_str: str) -> str:
     """Преобразует HTML-сущности в их фактические символы."""
     return html.unescape(input_str)
 
-
+def get_headers():
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+    return headers
 
 
 def format_date(published_at_str, website_id):
@@ -33,7 +35,7 @@ def format_date(published_at_str, website_id):
 
 
 def get_resource(url):
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+    headers = get_headers()
     response = requests.get(url, headers=headers)
     response.raise_for_status() 
     return response.text

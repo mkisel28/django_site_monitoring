@@ -1,12 +1,19 @@
+from typing import List, Dict, Any
+
 from django.db.models import OuterRef, Exists
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
-from .models import Website, Country, Article, Word, Configuration, TrackedWord, TrackedWordMention
+
 from django.http import JsonResponse
-from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from typing import List, Dict, Any
-from datetime import datetime, timedelta
+
+from .models import Website, Country, Article, Word, Configuration, TrackedWord, TrackedWordMention
+from django.db.models import Q
+
+from utils.date_helpers import apply_date_filter
+from utils.request_helpers import get_int_list_from_request
+from utils.query_helpers import get_articles_with_word, build_search_query
+from utils.text_helpers import create_articles
 
 # from channels.layers import get_channel_layer
 # from asgiref.sync import async_to_sync
@@ -23,20 +30,6 @@ from datetime import datetime, timedelta
 # def index(request):
 #     new_post_published("Test post")
 #     return render(request, 'main/index.html')
-
-
-def create_articles(articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Create articles based on the data in the database.
-
-    :param articles: A list of articles to create.
-    :return: The created articles.
-    """
-    for article in articles:
-        if article['title_translate']:
-            article['title'] = article['title_translate']
-            del article['title_translate']
-    return articles
 
 
 @login_required(login_url="/")
@@ -63,10 +56,6 @@ def all_favourite_country(request):
     """
     return render(request, 'main/all_favourite_country.html')
 
-import pymorphy2
-
-morph = pymorphy2.MorphAnalyzer()
-
 
 @login_required(login_url="/")
 def search(request):
@@ -76,19 +65,12 @@ def search(request):
     search_post = request.GET.get('search', '').lower().split()
     country_filters = request.GET.getlist(
         'countries')  # Получаем список выбранных стран
-    q_objects = Q()
-    for word in search_post:
-        normalized_word = morph.parse(word)[0].normal_form
-        q_objects &= Q(title__icontains=word) | Q(
-            title_translate__icontains=word)| Q(
-            normalized_title__icontains=word)| Q(
-            title__icontains=normalized_word)| Q(
-            title_translate__icontains=normalized_word)| Q(
-            normalized_title__icontains=normalized_word)
+    articles = Article.objects.filter(
+        Q(website__user=None) | Q(website__user=request.user)
+    )
+    q_objects = build_search_query(search_post)
 
-        
-
-    articles = Article.objects.filter(q_objects)
+    articles = articles.filter(q_objects)
 
     # Если выбраны страны, фильтруем по ним
     if country_filters:
@@ -109,6 +91,9 @@ def search(request):
         articles = articles.order_by("-published_at").values('id', 'title', 'title_translate',
                                                              'url', 'published_at', 'website__name', 'website__country__name')
     total_articles = len(articles)
+
+
+
     articles = create_articles(articles[:1000])
 
     countries = Country.objects.all()
@@ -134,24 +119,28 @@ def country_monitoring(request):
     other_countries = Country.objects.exclude(id__in=favorite_countries)
 
     favorite_sites = Website.objects.filter(
-        favorited_by=request.user).order_by('country__id')
-    other_sites = Website.objects.exclude(
-        favorited_by=request.user).order_by('country__id')
-    
-    words = Word.objects.order_by('-id')[:TOP_COUNT]
+        Q(user=None) | Q(user=request.user),
+        favorited_by=request.user
+    ).order_by('country__id')
 
+    other_sites = Website.objects.filter(
+        Q(user=None) | Q(user=request.user)
+    ).exclude(
+        favorited_by=request.user).order_by('country__id')
+
+    words = Word.objects.order_by('-id')[:TOP_COUNT]
 
     tracked_words = TrackedWord.objects.filter(user=request.user)
 
     # Создаем список словарей с каждым словом и его количеством упоминаний
     tracked_word_with_counts = []
     for tracked_word in tracked_words:
-        mentions_count = TrackedWordMention.objects.filter(word=tracked_word).count()
+        mentions_count = TrackedWordMention.objects.filter(
+            word=tracked_word).count()
         tracked_word_with_counts.append({
             'word': tracked_word,
             'count': mentions_count
         })
-
 
     context = {
         'favorite_countries': favorite_countries,
@@ -209,8 +198,8 @@ def api_country_articles(request):
 
     return JsonResponse(data)
 
-import time
 
+######### ОСНАВНАЯ API-ТОЧКА############
 @login_required(login_url="/")
 def api_article_list(request):
     """
@@ -219,7 +208,6 @@ def api_article_list(request):
     """
     # articles = Article.objects.filter(website_id=website_id).order_by(
     #     "-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
-
 
     # articles = create_articles(articles)[::-1]
     # return JsonResponse({'articles': list(articles)})
@@ -230,11 +218,14 @@ def api_article_list(request):
 
     for website_id in website_ids:
 
-        articles = Article.objects.filter(website_id=website_id).order_by("-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
+        articles = Article.objects.filter(
+            Q(website__user=None) | Q(website__user=request.user),
+            website_id=website_id
+        ).order_by("-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
         all_articles[website_id] = create_articles(articles)[::-1]
 
-
     return JsonResponse({'websites': all_articles})
+
 
 @login_required(login_url="/")
 def get_favorite_countries_articles_api(request):
@@ -256,6 +247,9 @@ def get_favorite_countries_articles_api(request):
         )
     ).filter(website__country__in=favourite_countries).order_by("-published_at").values(
         'id', 'title', 'title_translate', 'url', 'published_at', 'website__name', 'website__id', 'website__country__name', 'is_favorite'
+    )
+    articles = articles.filter(
+        Q(website__user=None) | Q(website__user=request.user)
     )
     if only_favorites:
         articles = articles.filter(website__favorited_by=request.user)[:100]
@@ -283,7 +277,9 @@ def get_all_live_articles_api(request):
     ).order_by("-published_at").values(
         'id', 'title', 'title_translate', 'url', 'published_at', 'website__name', 'website__id', 'website__country__name', 'is_favorite'
     )
-
+    articles = articles.filter(
+        Q(website__user=None) | Q(website__user=request.user)
+    )
     if only_favorites:
         articles = articles.filter(website__favorited_by=request.user)[:100]
     else:
@@ -291,48 +287,59 @@ def get_all_live_articles_api(request):
     articles = create_articles(articles)[::-1]
     return JsonResponse({'articles': list(articles)})
 
-##########ОСТАЛЬНАЯ API-ТОЧКИ############
+
+########## ОСТАЛЬНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
 def articles_for_related_data(request, data_id, data_type):
+    """
+    Получает статьи, связанные с определенным типом данных (словом или отслеживаемым словом) на основе
+    предоставленных фильтров запроса.
+
+    Args:
+    - request (HttpRequest): Запрос от клиента.
+    - data_id (int): ID слова или отслеживаемого слова.
+    - data_type (str): Тип данных - "word" или "track".
+
+    Filters:
+    - date (str): Фильтр по дате ("today", "week", "month").
+    - count (int): Количество возвращаемых статей.
+    - countries (str): Список ID стран, разделенных запятыми.
+    - websites (str): Список ID веб-сайтов, разделенных запятыми.
+
+    Returns:
+    - JsonResponse: Статьи, соответствующие условиям фильтра, или сообщение об ошибке.
+
+    Exepctions:
+    - 400: Если тип данных не является действительным или не найдены соответствующие статьи.
+    """
     date_filter = request.GET.get('date')
-    count_filter = request.GET.get('count')
+    count_filter = int(request.GET.get('count', 1000))
+    countries_filter = get_int_list_from_request(request, 'countries')
+    websites_filter = get_int_list_from_request(request, 'websites')
 
-    countries_filter = [int(x) for x in request.GET.get('countries').split(",") if x] if request.GET.get('countries') else []
-
-    
-    websites_filter = [int(x) for x in request.GET.get('websites').split(",") if x] if request.GET.get('websites') else []
     if data_type == "word":
         word = get_object_or_404(Word, id=data_id)
         base_query = word.articles.all()
+        date_filter, count_filter, countries_filter, websites_filter = None, 100, None, None
     elif data_type == "track":
         tracked_word = get_object_or_404(TrackedWord, id=data_id)
         base_query = Article.objects.filter(mentions__word=tracked_word)
     else:
         return JsonResponse({'error': 'Invalid data type'}, status=400)
-    
 
-    if date_filter:
-        today = datetime.today().date()
-        if date_filter == "today":
-            base_query = base_query.filter(published_at__gte=today)
-
-        elif date_filter == "week":
-            week_ago = today - timedelta(days=7)
-            base_query = base_query.filter(published_at__range=(week_ago, today))
-
-        elif date_filter == "month":
-            month_ago = today - timedelta(days=30)
-            base_query = base_query.filter(published_at__range=(month_ago, today))
+    base_query = apply_date_filter(base_query, date_filter)
 
     if countries_filter:
-        base_query = base_query.filter(website__country__id__in=countries_filter)
+        base_query = base_query.filter(
+            website__country__id__in=countries_filter)
 
     if websites_filter:
         base_query = base_query.filter(website__id__in=websites_filter)
 
     # Применение аннотаций и возвращение результатов
-    count_filter = int(count_filter) if count_filter else 1000
-    articles = base_query.annotate(
+    articles = base_query.filter(
+        Q(website__user=None) | Q(website__user=request.user)
+        ).annotate(
         is_favorite=Exists(
             Website.objects.filter(
                 id=OuterRef('website_id'),
@@ -348,10 +355,11 @@ def articles_for_related_data(request, data_id, data_type):
              'website__country__name',
              'published_at',
              'is_favorite')[:count_filter]
-    
-    articles = create_articles(articles)[::-1]
-    if len(articles) == 0:
 
+
+    articles = create_articles(articles)[::-1]
+
+    if len(articles) == 0:
         return JsonResponse({'error': 'Ничего не найдено'})
 
     return JsonResponse({'articles': list(articles)})
@@ -427,11 +435,7 @@ def remove_country_from_favorites_api(request, country_code):
         return JsonResponse({"status": "error", "message": str(e)})
 
 
-
-
-
-
-##########ОСТАЛЬНАЯ API-ТОЧКИ############
+########## ОСТАЛЬНАЯ API-ТОЧКИ############
 
 @login_required(login_url="/")
 def test(request):
@@ -459,8 +463,10 @@ def test(request):
         favourite_countries = request.user.favorite_countries.all()
         articles = Article.objects.filter(
             website__country__in=favourite_countries)
-
-    # Добавляем аннотацию для избранных
+    # Фильтрация статей на основе сайтов с website.user = None или сайтов привязанных к пользователю
+    articles = articles.filter(
+        Q(website__user=None) | Q(website__user=request.user)
+    )
     articles = articles.annotate(
         is_favorite=Exists(
             Website.objects.filter(
@@ -477,9 +483,16 @@ def test(request):
     if only_favorites:
         articles = articles.filter(website__favorited_by=request.user)
 
-
     articles = articles.order_by("-published_at").values(
-        'id', 'title', 'title_translate', 'url', 'published_at', 'website__name', 'website__id', 'website__country__name', 'is_favorite'
+        'id',
+        'title',
+        'title_translate',
+        'url',
+        'published_at',
+        'website__name',
+        'website__id',
+        'website__country__name',
+        'is_favorite'
     )[:100]
 
     articles = create_articles(articles)[::-1]

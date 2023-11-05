@@ -247,6 +247,7 @@ header {
   padding: 8px;
   border: 1px solid #ccc;
   font-size: 16px;
+  margin: 0;
 }
 
 .form-search input[type="submit"] {
@@ -389,15 +390,32 @@ color: #ffffff;
 
 
 
+.card-body  button {
+  display: block;
+  margin-top: 10px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  border: 1px solid #000000;
+  background-color: #000000;
+  color: #fff;
+  cursor: pointer;
+}
+.width-100 button{
+  width: 100%;
+}
+.button-wite button:hover{
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+}
 
-.form-container input[type="text"], input[type="password"], input[type="email"], select, textarea {
+input[type="text"],[type="url"], input[type="password"], input[type="email"], select, textarea {
   width: 100%;
   padding: 10px 15px;
   margin: 10px 0;
   border: 2px solid #ffffff;
 
-
-  
   border-bottom: 2px solid #656565;
   box-sizing: border-box; /* Это гарантирует, что padding не добавляет дополнительную ширину к элементу */
   font-size: 16px;
@@ -405,12 +423,12 @@ color: #ffffff;
 }
 
 /* Эффект при наведении */
-.form-container input[type="text"]:hover, input[type="password"]:hover, input[type="email"]:hover, select:hover, textarea:hover {
+ input[type="text"]:hover, input[type="password"]:hover, input[type="email"]:hover, select:hover, textarea:hover {
   border-color: #000000;
 }
 
 /* Эффект при фокусировке */
-.form-container input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
+ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
   border: 2px solid #000000;
   
   outline: none; /* Убрать стандартный контур браузера при фокусе */

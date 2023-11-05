@@ -1,12 +1,13 @@
 import pymorphy2
 import re
-from deep_translator import GoogleTranslator
+
 
 from django.db import models
 from django.utils import timezone
 from django.db import models
-from django.db.models import Q
 from django.contrib.auth.models import User
+
+from utils.query_helpers import get_articles_with_word
 
 
 
@@ -37,6 +38,7 @@ class Country(models.Model):
     
 
 class Website(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Пользователь")
     name = models.CharField(max_length=255, verbose_name="Название сайта")
     base_url = models.URLField(verbose_name="Базовый URL")
     sitemap_url = models.URLField(verbose_name="Ссылка на SITEMAP", default=None, null=True, blank=True)
@@ -111,7 +113,6 @@ class Article(models.Model):
                     #check_and_send_notifications(mention)
 
 
-
             return article
         
 
@@ -124,12 +125,14 @@ class Word(models.Model):
 
     def __str__(self):
         return self.text
-
+    
 class TrackedWord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tracked_words", db_index=True)
     keyword = models.CharField(max_length=255, verbose_name="Отслеживаемое слово")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Время добавления")
-
+    
+    def __str__(self):
+        return self.keyword
     class Meta:
         unique_together = ('user', 'keyword')
 
@@ -138,11 +141,7 @@ class TrackedWord(models.Model):
         super(TrackedWord, self).save(*args, **kwargs)
         
         # Проверяем все статьи на наличие этого слова
-        articles_with_word = Article.objects.filter(
-            Q(title__icontains=self.keyword) |
-            Q(title_translate__icontains=self.keyword) |
-            Q(normalized_title__icontains=self.keyword)
-        )
+        articles_with_word = get_articles_with_word(self.keyword, Article)
         # Создаем записи в TrackedWordMention для каждой статьи, содержащей это слово
         for article in articles_with_word:
             TrackedWordMention.objects.get_or_create(word=self, article=article, mentioned_at= article.published_at)
@@ -152,7 +151,9 @@ class TrackedWordMention(models.Model):
     word = models.ForeignKey(TrackedWord, on_delete=models.CASCADE, related_name="mentions")
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="mentions")
     mentioned_at = models.DateTimeField(auto_now_add=True)
-
+    
+    def __str__(self):
+        return self.word
     class Meta:
         unique_together = ('word', 'article')
 
@@ -172,10 +173,6 @@ class Configuration(models.Model):
     def __str__(self):
         return self.name
 
-
-def translate_text(from_lang, to_translate):
-    translated_text = GoogleTranslator(source=from_lang, target='ru').translate(to_translate)
-    return translated_text
 
 
 

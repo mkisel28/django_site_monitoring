@@ -5,9 +5,9 @@ from .models import Website, Article, Country, IgnoredURL, Word, Configuration, 
 
 
 class WebsiteAdmin(admin.ModelAdmin):
-    list_display = ['name', 'base_url', 'last_scraped', 'country', 'id']
+    list_display = ['name', 'base_url', 'last_scraped', 'country', 'id', 'user']
     search_fields = ['name']
-    list_filter = ['last_scraped', 'country']
+    list_filter = ['last_scraped', 'country', "user"]
 
 
 admin.site.register(Website, WebsiteAdmin)
@@ -76,12 +76,9 @@ admin.site.register(TrackedWord, TrackedWordAdmin)
 
 
 class TrackedWordMentionAdmin(admin.ModelAdmin):
-    list_display = ['display_word', 'url']
+    list_display = ['word', 'article','url' ]
     list_filter = ['word__user', 'word']
 
-    def display_word(self, obj):
-        return obj.word.keyword if obj.word.keyword else '-'
-    display_word.short_description = 'Слово'
 
     def url(self, obj):
         return obj.article.url if obj.article.url else '-'

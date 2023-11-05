@@ -14,9 +14,9 @@ urlpatterns = [
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
 
 
-
-
-
+    path("fetch_sitemaps/", views.fetch_sitemaps, name="fetch_sitemaps"),
+    path("fetch_website_details/", views.fetch_website_details, name="fetch_website_details"),
+    path('save_website/', views.save_website, name='save_website'),
 
     path('manage/', views.manage_tracked_words, name='manage_tracked_words'),
     path('add_word_api/', views.add_word_api, name='add_word_api'),

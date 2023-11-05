@@ -18,7 +18,6 @@
     <ul class="websites"></ul>
 </div>
 
-
 <link rel="stylesheet" type="text/css" href="{% static 'css/word_cloud.css' %}">
 
 <script>
@@ -36,7 +35,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         $('#countriesFilter').select2({
             placeholder: "Выберите страны",
-            width: '100%'
+            width: '100%',
         });
         $('#websitesFilter').select2({
             placeholder: "Выберите сайты",
@@ -69,7 +68,7 @@
                 const countriesValues = $('#countriesFilter').val();  // получение списка выбранных стран
                 const websitesValues = $('#websitesFilter').val();  
                 const countValues = $('#countFilter').val();  
-                const queryParams = new URLSearchParams();
+                let queryParams = new URLSearchParams();
                 if (dateValue) queryParams.append('date', dateValue);
                 if (countriesValues) queryParams.append('countries', countriesValues.join(','));
                 if (websitesValues) queryParams.append('websites', websitesValues.join(','));
@@ -112,7 +111,7 @@
               const countriesValues = $('#countriesFilter').val();  // получение списка выбранных стран
               const websitesValues = $('#websitesFilter').val();  
               const countValues = $('#countFilter').val();  
-              const queryParams = new URLSearchParams();
+              const  queryParams = new URLSearchParams();
               if (dateValue) queryParams.append('date', dateValue);
               if (countriesValues) queryParams.append('countries', countriesValues.join(','));
               if (websitesValues) queryParams.append('websites', websitesValues.join(','));

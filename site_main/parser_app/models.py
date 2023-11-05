@@ -1,14 +1,12 @@
 import logging
-import time
-
-import pymorphy2
-import re
 
 from django.db import models
 from django.utils import timezone
-from deep_translator import GoogleTranslator
-from deep_translator.exceptions import TranslationNotFound
+
 from django.contrib.auth.models import User
+
+from utils.service_utils import check_and_send_notifications, translate_text
+from utils.text_helpers import get_normalized_words_from_text
 
 
 logger = logging.getLogger("models")
@@ -45,6 +43,8 @@ class Country(models.Model):
 
 
 class Website(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Пользователь")
+
     name = models.CharField(max_length=255, verbose_name="Название сайта")
     base_url = models.URLField(verbose_name="Базовый URL")
     sitemap_url = models.URLField(verbose_name="Ссылка на SITEMAP", default=None, null=True, blank=True)
@@ -86,22 +86,14 @@ class Article(models.Model):
                 article.title_translate = translate_text(from_lang=website.language,
                                                          to_translate=title
                                                          )
-            morph = pymorphy2.MorphAnalyzer(lang='ru')
 
-            config = Configuration.objects.first()
-            black_list = tuple(
-                tag if tag != "NONE" else None for tag in config.black_list_tags.split(','))
-            black_list_word = tuple(config.black_list_words.split(','))
 
             if website.language in ["ru", "RU"]:
                 words = article.title
             else:
                 words = article.title_translate
-
-            text = re.sub(r'[^\w\s-]', '', words).split()
-            normalized_words = [morph.parse(x)[0].normal_form for x in text if len(x) > 1 and morph.parse(x)[
-                0].tag.POS not in black_list and x not in black_list_word]
-
+            config = Configuration.objects.first()
+            normalized_words = get_normalized_words_from_text(words, config)
             article.normalized_title = ' '.join(normalized_words)
 
             website.last_scraped = timezone.now()
@@ -192,36 +184,4 @@ class Configuration(models.Model):
         app_label = 'main'
 
 
-def translate_text(from_lang, to_translate):
 
-    MAX_RETRIES = 10
-    for i in range(MAX_RETRIES):
-        try:
-            translated_text = GoogleTranslator(
-                source=from_lang, target='ru').translate(to_translate)
-            logger.info(f"Попытка перевода №{i+1}. Успешно.")
-
-            return translated_text
-        except TranslationNotFound:
-            logger.error(f"Попытка перевода №{i+1}. Ошибка перевода.")
-            time.sleep(1)
-    raise TranslationNotFound(
-        f"Не удалось перевести после {MAX_RETRIES} попыток")
-
-
-
-from telegram_bot import send_telegram_notification
-
-def check_and_send_notifications(tracked_word_mention):
-    tracked_word = tracked_word_mention.word
-    article = tracked_word_mention.article
-
-    user = tracked_word.user
-
-    try:
-        user_profile = user.userprofile
-        if user_profile.telegram_notifications and user_profile.telegram_chat_id:
-            send_telegram_notification(user_profile.telegram_chat_id, article, tracked_word.keyword)
-    except Exception as e:
-        logger.error(f"Failed to send notification to user {user.username} with error {e}")
-        pass

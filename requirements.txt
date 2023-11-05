@@ -1,5 +1,4 @@
-update
 redis-server
 import pymorphy2
-import re
 from deep_translator
+feedparser
