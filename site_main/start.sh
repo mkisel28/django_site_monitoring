@@ -1,4 +1,5 @@
 #!/bin/bash
+chmod +x site_main/start.sh
 
 python site_main/manage.py migrate
 if [ ! -f "db_loaded.txt" ]; then
