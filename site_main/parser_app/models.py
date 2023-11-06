@@ -104,6 +104,7 @@ class Article(models.Model):
 
             # Проверка и сохранение упоминаний в TrackedWordMention
             tracked_words = TrackedWord.objects.all()
+            users_keywords_dict = {} 
             for word in tracked_words:
                 if word.keyword and (
                 (article.title and word.keyword.lower() in article.title.lower()) or 
@@ -111,8 +112,11 @@ class Article(models.Model):
                 (article.normalized_title and word.keyword.lower() in article.normalized_title.lower())
                 ):
                     mention = TrackedWordMention.objects.create(word=word, article=article)
-                    check_and_send_notifications(mention)
-
+                    if word.user not in users_keywords_dict:
+                        users_keywords_dict[word.user] = []
+                    users_keywords_dict[word.user].append(word.keyword)
+            for user, keywords in users_keywords_dict.items():
+                check_and_send_notifications(user, article, keywords)
 
 
             return article

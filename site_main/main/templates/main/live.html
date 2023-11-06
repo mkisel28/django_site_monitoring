@@ -2,10 +2,14 @@
 {% load static %}
 {% block content %}
 
-
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 
 <div class="live" id='live-tracking-page'> </div>
-
+<div class="widget all">
+  {% include "main/word_cloud.html" %}
+  {% include "main/tracked_word_cloud.html" %}
+</div>
 <div class="website-block" >
   <div class="filters live">
     <div class="checkbox-wrapper-34">

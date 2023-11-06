@@ -175,7 +175,10 @@ header {
   margin: 0;
   padding: 0;
 }
-
+.invert-colors {
+  filter: invert(1);
+  background-color: black; /* Вы можете изменить это на любой другой цвет, если необходимо */
+}
 .main-nav a {
   text-decoration: none;
   color: #333;
@@ -195,10 +198,15 @@ header {
   background-color: #000000;
   color: #ffffff;
   border-radius: 5px;
+  border: 1px solid #000000;
   text-decoration: none;
   transition: background-color 0.3s ease, color 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-weight: 600;
+}
+.small-button{
+  font-size: 12px;
+  padding: 5px 8px;
 }
 
 .button-link:hover {

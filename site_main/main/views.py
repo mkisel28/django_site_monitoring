@@ -12,7 +12,7 @@ from django.db.models import Q
 
 from utils.date_helpers import apply_date_filter
 from utils.request_helpers import get_int_list_from_request
-from utils.query_helpers import get_articles_with_word, build_search_query
+from utils.query_helpers import build_search_query
 from utils.text_helpers import create_articles
 
 # from channels.layers import get_channel_layer
@@ -46,7 +46,25 @@ def live_all(request):
     """
     Отображает страницу со всеми статьями в реальном времени.
     """
-    return render(request, 'main/live.html', {'articles': None})
+    config = Configuration.objects.first()
+    TOP_COUNT = config.top_words_count
+    
+    words = Word.objects.order_by('-id')[:TOP_COUNT]
+
+    tracked_words = TrackedWord.objects.filter(user=request.user)
+
+    # Создаем список словарей с каждым словом и его количеством упоминаний
+    tracked_word_with_counts = []
+    for tracked_word in tracked_words:
+        mentions_count = TrackedWordMention.objects.filter(
+            word=tracked_word).count()
+        tracked_word_with_counts.append({
+            'word': tracked_word,
+            'count': mentions_count
+        })
+    return render(request, 'main/live.html', {'articles': None,
+                                              'words': words[::-1],
+                                              "tracked_word_with_counts": tracked_word_with_counts})
 
 
 @login_required(login_url="/")
@@ -91,8 +109,6 @@ def search(request):
         articles = articles.order_by("-published_at").values('id', 'title', 'title_translate',
                                                              'url', 'published_at', 'website__name', 'website__country__name')
     total_articles = len(articles)
-
-
 
     articles = create_articles(articles[:1000])
 
@@ -339,7 +355,7 @@ def articles_for_related_data(request, data_id, data_type):
     # Применение аннотаций и возвращение результатов
     articles = base_query.filter(
         Q(website__user=None) | Q(website__user=request.user)
-        ).annotate(
+    ).annotate(
         is_favorite=Exists(
             Website.objects.filter(
                 id=OuterRef('website_id'),
@@ -355,7 +371,6 @@ def articles_for_related_data(request, data_id, data_type):
              'website__country__name',
              'published_at',
              'is_favorite')[:count_filter]
-
 
     articles = create_articles(articles)[::-1]
 

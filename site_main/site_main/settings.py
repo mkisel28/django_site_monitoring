@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+env = environ.Env()
+environ.Env.read_env(".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-%&g9kz@%0ilixq%nq+837xn!ra+5+1&&!i$bx56u%@&v#md)!("
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['95.164.84.80', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -77,25 +81,17 @@ TEMPLATES = [
 WSGI_APPLICATION = "site_main.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'website_parsing',
-        'USER': 'postgres',
-        'PASSWORD': 'Maksim2001',
-        'HOST': 'localhost',
+        'NAME': env('POSTGRES_DB'),
+        'USER': env('POSTGRES_USER'),
+        'PASSWORD': env('POSTGRES_PASSWORD'),
+        'HOST': env('POSTGRES_HOST'),
         'PORT': '5432',
     }
 }
+
 # CHANNEL_LAYERS = {
 #     'default': {
 #         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -136,8 +132,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]

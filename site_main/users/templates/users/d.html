@@ -5,29 +5,12 @@
 <!-- Кружочек крутится "ожидание" -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
-{% comment %} <div class="card mt-4">
-    <div class="card-header cardToggle">
-        <h3>Добавить новый сайт</h3>
-        <span class="float-right">Скрыть ▲</span> 
-  
-    </div>
-    <div class="card-body" style="display: none;">
-    <form id="websiteForm" method="post">
-        {% csrf_token %}
-        <label for="url">URL сайта:</label>
-        <input type="url" id="url" name="url">
-        <button type="submit">Получить данные</button>
-    </form>
-    <div id="detailsFormContainer">
-        <i id="loadingIndicator" class="fas fa-circle-notch fa-spin" style="display: none;"></i>
-    </div>
-</div> {% endcomment %}
 
 
 <div class="card mt-4">
     <div class="card-header cardToggle">
         <h3>Добавить новый сайт</h3>
-        <span class="float-right">Скрыть ▲</span>
+        <span class="float-right toggleText">Свернуть &#9650;</span>
     </div>
     <div class="card-body width-100 button-wite">
         <!-- Этап 1 -->
@@ -111,53 +94,32 @@
         });
     });
 </script>
+
 <script>
     $(document).ready(function() {
         $('.cardToggle').on('click', function() {
             const cardBody = $(this).next('.card-body');
-            cardBody.slideToggle('slow');
+            const toggleText = $(this).find('.toggleText');
     
-
+            cardBody.slideToggle('slow', function() {
+                if (cardBody.is(':visible')) {
+                    toggleText.html("Свернуть &#9650;");
+                } else {
+                    toggleText.html("Развернуть &#9660;");
+                }
+            });
         });
     });
 </script>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>   
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-{% comment %} <script>
-    $(document).ready(function(){
-        $("#websiteForm").submit(function(event){
-            event.preventDefault();
-            $("#loadingIndicator").show();
-            $.ajax({
-                url: '{% url "users:fetch_website_details" %}',  // URL вашего Django-представления
-                type: 'POST',
-                data: {
-                    'url': $('#url').val(),
-                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
-                },
-                success: function(data){
-                    $("#loadingIndicator").hide();
-                    $("#detailsFormContainer").html(data.form_html); 
-                     // Загружаем форму с деталями сайта
-                },
-                error: function(error) {
-                    console.log(error);
-                    $("#loadingIndicator").hide();
-                    let parsedResponse = JSON.parse(error.responseText);
-                    alert(parsedResponse.error);
-                }
-            });
-        });
-    });
-</script> {% endcomment %}
+
+
 <script>
 $(document).ready(function() {
 
@@ -177,11 +139,6 @@ $(document).ready(function() {
                 sitemapDropdown.empty();
                 $("#detailsFormContainer").html(data.form_html); 
 
-               // for(let sitemap of data.sitemaps) {
-               //     sitemapDropdown.append($('<option></option>').attr('value', sitemap).text(sitemap));
-               // }
-                
-                // Переходим к следующему этапу
                 $("#step1").hide();
                 $("#step2").show();
             },
@@ -205,7 +162,7 @@ $(document).ready(function() {
             var sitemapToSend = selectedSitemap;
         }
         $.ajax({
-            url: '{% url "users:fetch_website_details" %}',  // URL вашего Django-представления для этапа 2
+            url: '{% url "users:fetch_website_details" %}',  // URL  Django-представления для этапа 2
             type: 'POST',
             data: {
                 'sitemap_url': sitemapToSend,
@@ -216,7 +173,6 @@ $(document).ready(function() {
                 // Здесь можно обновить поля формы на этапе 3 данными из ответа
                 $('#name').val(data.name);
                 $('#language').val(data.language);
-                // ... и так далее для других полей
                 $("#endFormContainer").html(data.form_html); 
                 
                 // Переходим к следующему этапу
@@ -241,7 +197,6 @@ $(document).ready(function() {
                 alert("Сайт успешно сохранен!");
                 $("#step3").hide();
                 $("#step1").show();
-                // Здесь можно добавить дополнительные действия при успешном сохранении
             },
             error: function(error) {
                 alert("Произошла ошибка при сохранении. Попробуйте снова.");

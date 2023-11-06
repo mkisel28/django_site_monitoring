@@ -2,15 +2,23 @@
 <div class="word-cloud" id="treck_word-conteiner" style="display: block;">
   <span>Отслеживаемые слова</span>
   <ul>
-    {% for item in tracked_word_with_counts %}
+    {% if tracked_word_with_counts %}
+      {% for item in tracked_word_with_counts %}
+        <li>
+          <a href="#" class="word" data-treck-cloud-id="{{ item.word.id }}">
+            {{ item.word.keyword }} 
+            <span class="count">({{ item.count }})</span>
+          </a>
+        </li>
+      {% endfor %}
+    {% else %}
       <li>
-        <a href="#" class="word" data-treck-cloud-id="{{ item.word.id }}">
-          {{ item.word.keyword }} 
-          <span class="count">({{ item.count }})</span>
-        </a>
+        <span>У вас пока нет отслеживаемых слов.</span> 
+        <a class="button-link small-button"  href={% url 'users:manage_tracked_words' %}>Добавьте их здесь</a>.
       </li>
-    {% endfor %}
+    {% endif %}
   </ul>
+</div>
   <!-- ФИЛЬТРЫ -->
  {% include "main/filter_section_tracked_word.html " %}
 

@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=website_parsing
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Maksim2001
+    ports:
+      - '5445:5432'
+  
+  web:
+    build: .
+    command: ["./start.sh"]
+    volumes:
+      - ./site_main:/app/site_main
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  
+  parser:
+    build:
+      context: .
+      dockerfile: Dockerfile.parser
+    command: ["python", "site_main/parser_app/main.py"]
+    volumes:
+      - ./site_main:/app/site_main
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

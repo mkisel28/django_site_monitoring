@@ -5,7 +5,10 @@ from pathlib import Path
 from django.conf import settings
 import django
 
+import environ
 
+env = environ.Env()
+environ.Env.read_env(".env")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
  
@@ -13,10 +16,10 @@ settings.configure(
     DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'website_parsing',
-        'USER': 'postgres',
-        'PASSWORD': 'Maksim2001',
-        'HOST': 'localhost',
+        'NAME': env('POSTGRES_DB'),
+        'USER': env('POSTGRES_USER'),
+        'PASSWORD': env('POSTGRES_PASSWORD'),
+        'HOST': env('POSTGRES_HOST'),
         'PORT': '5432',
         }
     },
@@ -88,7 +91,6 @@ INSTALLED_APPS = [
     USE_TZ=True)
 
 django.setup()
-
 
 from controller import main, top_words
 

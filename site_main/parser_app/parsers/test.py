@@ -44,11 +44,3 @@
 # print(parse(url))
 
 
-def translate_text(from_lang, to_translate):
-    translated_text = GoogleTranslator(source=from_lang, target='ru').translate(to_translate)
-    return translated_text
-from deep_translator import GoogleTranslator
-
-a = "قالیباف: امروز فلسطین مساله اول جهان است"
-
-print(translate_text("fa", a))
