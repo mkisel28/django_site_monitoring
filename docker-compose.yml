@@ -35,7 +35,7 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile.parser
-    command: ["python", "parser_app/main.py"]
+    command: ["./pars.sh"]
     environment:
       - POSTGRES_DB=website_parsing
       - POSTGRES_USER=postgres

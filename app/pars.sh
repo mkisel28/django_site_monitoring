@@ -11,3 +11,4 @@ then
 
     echo "DB did run."
 fi
+python manage.py runserver
