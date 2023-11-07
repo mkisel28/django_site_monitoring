@@ -1,3 +1,5 @@
+#!/bin/bash
+
 chmod +x pars.sh
 if [ "$DATABASE" = "postgres" ]
 then
@@ -11,4 +13,4 @@ then
 
     echo "DB did run."
 fi
-python manage.py runserver
+python parser_app/main.py
