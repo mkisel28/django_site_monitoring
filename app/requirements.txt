@@ -1,0 +1,10 @@
+redis-server
+pymorphy2
+beautifulsoup4
+deep-translator
+feedparser
+psycopg2-binary>=2.9,<3.0
+django-environ>=0.7,<1.0
+django
+gunicorn==20.0.4
+lxml

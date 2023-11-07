@@ -14,40 +14,48 @@ services:
       - '5445:5432'
   
   web:
-    build: .
-    command: ["./site_main/start.sh"]
+    build: ./app
+    command: ["./entrypoint.sh"]
     volumes:
-      - ./site_main:/app/site_main
+      - statics_volume:/site/static
+      - ./site/:/usr/src/site_main/
     environment:
       - POSTGRES_DB=website_parsing
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=Maksim2001
       - POSTGRES_HOST=db
     ports:
-      - "80:8000"
+      - 8000:8000
     depends_on:
       - db
+    expose:
+      - 8000
   
   parser:
     build:
-      context: .
+      context: ./app
       dockerfile: Dockerfile.parser
-    command: ["python", "site_main/parser_app/main.py"]
+    command: ["python", "parser_app/main.py"]
     environment:
       - POSTGRES_DB=website_parsing
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=Maksim2001
       - POSTGRES_HOST=db
     volumes:
-      - ./site_main:/app/site_main
+      - ./site/:/usr/src/site_main/
     depends_on:
       - db
-      
+
   nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+    build: ./nginx
     ports:
-      - "80:80"
+      - 1137:80
+    volumes:
+      - statics_volume:/usr/share/nginx/html/static
+    depends_on:
+      - web
+
+
 volumes:
   pgdata:
+  statics_volume:

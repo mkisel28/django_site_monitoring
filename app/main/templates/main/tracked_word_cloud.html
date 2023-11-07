@@ -1,0 +1,28 @@
+{% load static %}
+<div class="word-cloud" id="treck_word-conteiner" style="display: block;">
+  <span>Отслеживаемые слова</span>
+  <ul>
+    {% if tracked_word_with_counts %}
+      {% for item in tracked_word_with_counts %}
+        <li>
+          <a href="#" class="word" data-treck-cloud-id="{{ item.word.id }}">
+            {{ item.word.keyword }} 
+            <span class="count">({{ item.count }})</span>
+          </a>
+        </li>
+      {% endfor %}
+    {% else %}
+      <li>
+        <span>У вас пока нет отслеживаемых слов.</span> 
+        <a class="button-link small-button"  href={% url 'users:manage_tracked_words' %}>Добавьте их здесь</a>.
+      </li>
+    {% endif %}
+  </ul>
+</div>
+  <!-- ФИЛЬТРЫ -->
+ {% include "main/filter_section_tracked_word.html" %}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
+</div>

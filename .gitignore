@@ -7,3 +7,4 @@ site_main/main/__pycache__/models.cpython-39.pyc
 .pyc
 **.log
 site_main/site_main/1local_settings.py
+app/site_main/local_settings.py
