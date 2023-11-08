@@ -1,18 +1,23 @@
 from django.contrib import admin
 
 
-from .models import Website, Article, Country, IgnoredURL, Word, Configuration, TrackedWord, TrackedWordMention, UserProfile
+from .models import (Website, 
+                     Article, Country,
+                     IgnoredURL, Word,
+                     Configuration, 
+                     TrackedWord, 
+                     TrackedWordMention, 
+                     UserProfile)
 
-
+@admin.register(Website)
 class WebsiteAdmin(admin.ModelAdmin):
     list_display = ['name', 'base_url', 'last_scraped', 'country', 'id', 'user']
     search_fields = ['name']
     list_filter = ['last_scraped', 'country', "user"]
 
 
-admin.site.register(Website, WebsiteAdmin)
 
-
+@admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'website',
                     'published_at', 'url', 'display_country']
@@ -24,16 +29,14 @@ class ArticleAdmin(admin.ModelAdmin):
     display_country.short_description = 'Страна'
 
 
-admin.site.register(Article, ArticleAdmin)
 
-
+@admin.register(Country)
 class CountryAdmin(admin.ModelAdmin):
     list_display = ['name', 'code']
     search_fields = ['name', 'code']
     list_filter = ['name', 'code']
 
 
-admin.site.register(Country, CountryAdmin)
 
 
 class IgnoredURLAdmin(admin.ModelAdmin):
@@ -42,7 +45,7 @@ class IgnoredURLAdmin(admin.ModelAdmin):
 
 admin.site.register(IgnoredURL, IgnoredURLAdmin)
 
-
+@admin.register(Word)
 class WordAdmin(admin.ModelAdmin):
     list_display = ['id', 'text', 'frequency',
                     'timestamp']
@@ -50,9 +53,8 @@ class WordAdmin(admin.ModelAdmin):
                    'timestamp']
 
 
-admin.site.register(Word, WordAdmin)
 
-
+@admin.register(Configuration)
 class ConfigurationAdmin(admin.ModelAdmin):
     list_display = ['name',
                     'black_list_tags',
@@ -62,9 +64,8 @@ class ConfigurationAdmin(admin.ModelAdmin):
                     ]
 
 
-admin.site.register(Configuration, ConfigurationAdmin)
 
-
+@admin.register(TrackedWord)
 class TrackedWordAdmin(admin.ModelAdmin):
     list_display = ['user',
                     'keyword'
@@ -72,9 +73,8 @@ class TrackedWordAdmin(admin.ModelAdmin):
     list_filter = ['user']
 
 
-admin.site.register(TrackedWord, TrackedWordAdmin)
 
-
+@admin.register(TrackedWordMention)
 class TrackedWordMentionAdmin(admin.ModelAdmin):
     list_display = ['word', 'article','url' ]
     list_filter = ['word__user', 'word']
@@ -85,12 +85,13 @@ class TrackedWordMentionAdmin(admin.ModelAdmin):
     url.short_description = 'URL'
 
 
-admin.site.register(TrackedWordMention, TrackedWordMentionAdmin)
 
-
+@admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'telegram_chat_id', 'telegram_notifications']
     list_filter = ['user']
 
 
-admin.site.register(UserProfile, UserProfileAdmin)
+
+    
+    

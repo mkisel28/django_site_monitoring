@@ -18,7 +18,7 @@ settings.configure(
         'NAME': "website_parsing",
         'USER': "postgres",
         'PASSWORD': "Maksim2001",
-        'HOST': "db",
+        'HOST': "localhost",
         'PORT': '5432',
         }
     },

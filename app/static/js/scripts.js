@@ -1,5 +1,5 @@
 
-$(document).ready(function() {
+
     function formatDateTime(dateTimeStr) {
       var date = new Date(dateTimeStr);
       var day = String(date.getDate()).padStart(2, '0');
@@ -12,24 +12,29 @@ $(document).ready(function() {
   }
 
 
-        function updateArticles() {
+        function updateArticles(type) {
             // Получаем все website IDs сразу
-            var websiteIds = $('.website-block').map(function() {
-                return $(this).data('id'); // Извлекаем ID напрямую из data-id
+            var $activeTab = $(`#${type}`);
+            var ids = $activeTab.find('.website-block').map(function() {
+                return $(this).data('id');
             }).get();
 
             // Отправляем один запрос с этими IDs
+            if (ids.length > 0) {
             $.ajax({
                 url: "/api/websites/", 
                 type: 'GET',
-                data: { 'website_ids[]': websiteIds },
+                data: {
+                    'ids[]': ids,
+                    'type': type // Добавили тип для параметров запроса
+                },
                 dataType: 'json',
                 success: function(data) {
-                    $('.website-block').each(function() {
+                    $activeTab.find('.website-block').each(function() {
                         var $block = $(this);
                         var websiteId = $block.data('id').toString();
                         var articles = data.websites[websiteId];
-                        var $list = $block.find('#website-list');
+                        var $list = $block.find('.website-list'); // Используйте класс вместо id
                         
                         var currentIds = $list.find('li').map(function() {
                             return $(this).data('id');
@@ -58,6 +63,7 @@ $(document).ready(function() {
                 }
             });
         }
+    }
 
         function addArticles($list, articles) {
             // Добавляем статьи в начало списка
@@ -80,9 +86,38 @@ $(document).ready(function() {
                 $list.find('.website-url.highlight').removeClass('highlight');
             }, 399);
         }
-      updateArticles() 
-      setInterval(updateArticles, 15000); // обновляем каждые 10 секунд
-  });
+
+        function setActiveTabUpdate() {
+            var activeTab = document.querySelector(".tablinks.active").getAttribute("onclick");
+            var type = activeTab.match(/openTab\(event, '(\w+)'\)/)[1];
+            updateArticles(type);
+        }
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+            // Это удалит все дочерние элементы, сбрасывая список
+            if (evt.currentTarget.className.indexOf("active") > -1) {
+                updateArticles(tabName);
+            }
+
+            // Вызов функции обновления с нужным типом
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementsByClassName("tablinks")[0].click();
+            setInterval(setActiveTabUpdate, 15000);
+        });
+    //   updateArticles() 
+    //   setInterval(updateArticles, 15000); // обновляем каждые 10 секунд
+
   
 
 

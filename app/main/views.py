@@ -1,5 +1,3 @@
-from typing import List, Dict, Any
-
 from django.db.models import OuterRef, Exists
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
@@ -38,7 +36,8 @@ def website_list(request):
     Отображает страницу со списком всех сайтов, отсортированных по времени последнего сканирования.
     """
     websites = Website.objects.all().order_by('-last_scraped')
-    return render(request, 'main/website_list.html', {'websites': websites})
+    countries = Country.objects.all().order_by('id')
+    return render(request, 'main/website_list.html', {'websites': websites, 'countries': countries})
 
 
 @login_required(login_url="/")
@@ -72,7 +71,7 @@ def all_favourite_country(request):
     """
     Отображает страницу с избранными странами пользователя.
     """
-    return render(request, 'main/all_favourite_country.html')
+    return render(request, 'main/all_favorite_country.html')
 
 
 @login_required(login_url="/")
@@ -148,7 +147,7 @@ def country_monitoring(request):
 
     tracked_words = TrackedWord.objects.filter(user=request.user)
 
-    # Создаем список словарей с каждым словом и его количеством упоминаний
+    #список словарей с каждым словом и его количеством упоминаний
     tracked_word_with_counts = []
     for tracked_word in tracked_words:
         mentions_count = TrackedWordMention.objects.filter(
@@ -227,19 +226,31 @@ def api_article_list(request):
 
     # articles = create_articles(articles)[::-1]
     # return JsonResponse({'articles': list(articles)})
-
-    website_ids = request.GET.getlist('website_ids[]')
+    type = request.GET.get('type')
+    ids = request.GET.getlist('ids[]')
 
     all_articles = {}
+    if type == 'Websites':
+        for website_id in ids:
 
-    for website_id in website_ids:
+            articles = Article.objects.filter(
+                Q(website__user=None) | Q(website__user=request.user),
+                website_id=website_id
+            ).order_by("-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
+            all_articles[website_id] = create_articles(articles)[::-1]
+    elif type == 'Countries':
+        for country_id in ids:
 
-        articles = Article.objects.filter(
-            Q(website__user=None) | Q(website__user=request.user),
-            website_id=website_id
-        ).order_by("-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
-        all_articles[website_id] = create_articles(articles)[::-1]
-
+            articles = Article.objects.filter(
+                Q(website__user=None) | Q(website__user=request.user),
+                website__country__id=country_id
+            ).order_by("-published_at"
+                       ).values('website__country_id', 'id', 'title', 'title_translate', 'url', 'published_at')[:3]
+            # articles_list = []
+            # # for article in articles:
+            # #     article['id'] = article.pop('website__country_id')
+            # #     articles_list.append(article)
+            all_articles[country_id] = create_articles(articles)[::-1]
     return JsonResponse({'websites': all_articles})
 
 
@@ -451,7 +462,6 @@ def remove_country_from_favorites_api(request, country_code):
 
 
 ########## ОСТАЛЬНАЯ API-ТОЧКИ############
-
 @login_required(login_url="/")
 def test(request):
     """

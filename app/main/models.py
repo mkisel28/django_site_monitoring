@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 import pymorphy2
 import re
 
@@ -19,6 +20,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user
     
+
 class IgnoredURL(models.Model):
     base_url = models.URLField(verbose_name="URL для игнорирования статей")
     users = models.ManyToManyField(User, related_name="ignored_urls", blank=True)  # добавлено
@@ -156,6 +158,11 @@ class TrackedWordMention(models.Model):
         return self.word
     class Meta:
         unique_together = ('word', 'article')
+
+
+
+
+
 
 class Configuration(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name="Configuration Name")

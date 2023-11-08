@@ -56,7 +56,7 @@
             {% endif %}
                 <h2>{{ website.name }}</h2>
 
-                <ul id="website-list">
+                <ul class="website-list">
 
                 </ul>
 
@@ -67,30 +67,29 @@
 
 <div id="Countries" class="tabcontent">
     <h1>Страны</h1>
-    <!-- Ваш HTML код для блока Страны -->
+    <div class="websites">
+        {% for country in countries %}
+        <div class="website-block"  data-id ="{{country.id}}" data-url="{% url 'main:website_articles' country.id %}">
+            <div class="country">{{ website.country.name }}</div>  
+            {% if country in request.user.favorite_countries.all %}
+            <a href="#" class="toggle-favorite" data-action="{% url 'main:remove_favorite' country.id %}"><i class="fas fa-star"></i></a> <!-- Звезда для избранных -->
+        {% else %}
+            <a href="#" class="toggle-favorite" data-action="{% url 'main:add_favorite' country.id %}"><i class="far fa-star"></i></a> <!-- Пустая звезда для неизбранных -->
+        {% endif %} 
+            <h2>{{ country.name }}</h2>
+
+            <ul class="website-list">
+
+            </ul>
+
+        </div>
+    {% endfor %}
 </div>
-<script>
-    // Функция для открытия вкладки
-    function openTab(evt, tabName) {
-        var i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tabcontent");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-        tablinks = document.getElementsByClassName("tablinks");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
-        document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " active";
-    }
-    
-    // Получаем элемент с id="defaultOpen" и кликаем по нему
-    document.getElementsByClassName("tablinks")[0].click();
-    </script>
+    <script src="{% static 'js/scripts.js' %}"  ></script>
+
+
 
     <script src="{% static 'js/click.js' %}"  ></script>
-    <script src="{% static 'js/scripts.js' %}"  ></script>
     
     <script src="{% static 'js/favorite_handler.js' %}"  ></script>
 
