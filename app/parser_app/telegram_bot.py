@@ -10,10 +10,26 @@
 # def main():
 #     while True:
 #         asyncio.run(send_telegram_notification(1689568914,"fdfd" ))
+import requests
+
 import logging
 logger = logging.getLogger("notification")
 
-import requests
+
+
+class TelegramLoggingHandler(logging.Handler):
+    def __init__(self, token, chat_id):
+        super().__init__()
+        self.TOKEN = token
+        self.chat_id = chat_id
+
+    def emit(self, record):
+        message = self.format(record)
+        try:
+            requests.get(f"https://api.telegram.org/bot{self.TOKEN}/sendMessage?chat_id={self.chat_id}&text={message}")
+        except Exception:
+            pass
+        
 def send_telegram_notification(chat_id, article, tracked_word):
     title = article.title_translate if article.title_translate else article.title
     TOKEN= '5839656131:AAEi-43ttcx3nDEh83ij0lz-ajh1EIfp7CU'

@@ -1,0 +1,171 @@
+<style>
+  body {
+      font-family: 'Arial', sans-serif;
+  }
+
+  .filter-panel {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease-in-out;
+  }
+
+  .filter-panel.expanded {
+      max-height: 500px; /* Максимальная высота, которую панель может занять */
+  }
+
+  .filter-toggle {
+      display: inline-block;
+      margin: 20px 0;
+      padding: 10px 15px;
+      cursor: pointer;
+      background-color: #0056b3;
+      color: white;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+  }
+
+  .filter-toggle:hover {
+      background-color: #003b82;
+  }
+
+  .filter-item {
+      margin: 10px 0;
+  }
+
+  label {
+      display: block;
+      margin: 5px 0;
+  }
+
+  input[type="date"],
+  select,
+  input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0 12px;
+      display: inline-block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+  }
+
+  input[type="radio"] {
+      margin-right: 5px;
+  }
+
+  button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+  }
+
+  button:hover {
+      background-color: #45a049;
+  }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<button class="filter-toggle" onclick="toggleFilterPanel()">Фильтры (пока не работает)</button>
+
+<div class="p-5 bg-gray-100 ">
+    <div class="max-w-md mx-auto bg-white rounded-lg overflow-hidden md:max-w-lg filter-panel" id="filterPanel">
+        <div class="md:flex">
+            <div class="w-full p-3">
+                <div class="mb-5">
+                    <label for="date-from" class="block mb-2 text-sm text-gray-600">Дата с:</label>
+                    <input type="date" id="date-from" name="date-from" class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none">
+                </div>
+
+                <div class="mb-5">
+                    <label for="date-to" class="block mb-2 text-sm text-gray-600">Дата по:</label>
+                    <input type="date" id="date-to" name="date-to" class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none">
+                </div>
+
+                <div class="mb-5">
+                    <label class="block mb-2 text-sm text-gray-600">Любимые страны:</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="radio" id="fav-countries-yes" name="fav-countries" value="yes" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="fav-countries-yes" class="text-sm text-gray-700">Да</label>
+
+                        <input type="radio" id="fav-countries-no" name="fav-countries" value="no" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="fav-countries-no" class="text-sm text-gray-700">Нет</label>
+
+                        <input type="radio" id="fav-countries-all" name="fav-countries" value="all" checked class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="fav-countries-all" class="text-sm text-gray-700">Все</label>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block mb-2 text-sm text-gray-600">Любимые сайты:</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="radio" id="fav-websites-yes" name="fav-websites" value="yes" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="fav-websites-yes" class="text-sm text-gray-700">Да</label>
+
+                        <input type="radio" id="fav-websites-no" name="fav-websites" value="no" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="fav-websites-no" class="text-sm text-gray-700">Нет</label>
+
+                        <input type="radio" id="fav-websites-all" name="fav-websites" value="all" checked class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="fav-websites-all" class="text-sm text-gray-700">Все</label>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label for="website-select" class="block mb-2 text-sm text-gray-600">Сайты:</label>
+                    <select id="website-select" name="websites" multiple class="w-full h-32 px-3 py-2 border rounded-lg text-gray-700 focus:outline-none">
+                        <!-- Здесь должны быть ваши опции сайтов -->
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <label for="text-query" class="block mb-2 text-sm text-gray-600">Текстовый запрос:</label>
+                    <input type="text" id="text-query" name="text-query" class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none">
+                </div>
+
+                <div class="mb-6">
+                    <button id="apply-filters" onclick="applyFilters()" class="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg w-full hover:bg-blue-500 focus:outline-none focus:bg-blue-700">
+                        Применить фильтры
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+function toggleFilterPanel() {
+    var filterPanel = document.getElementById('filterPanel');
+    filterPanel.classList.toggle('expanded');
+}
+</script>
+
+
+<script>
+  function applyFilters() {
+      var dateFrom = document.getElementById('date-from').value;
+      var dateTo = document.getElementById('date-to').value;
+      var favCountries = document.querySelector('input[name="fav-countries"]:checked').value;
+      var favWebsites = document.querySelector('input[name="fav-websites"]:checked').value;
+      var selectedWebsites = Array.from(document.getElementById('website-select').selectedOptions).map(option => option.value);
+      var textQuery = document.getElementById('text-query').value;
+  
+      console.log('Фильтры:', {
+          dateFrom,
+          dateTo,
+          favCountries,
+          favWebsites,
+          selectedWebsites,
+          textQuery
+      });
+  
+      // Здесь будет логика отправки данных фильтрации на сервер или фильтрации на клиенте.
+  }
+  </script>

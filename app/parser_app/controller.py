@@ -1,27 +1,35 @@
 import logging
 from models import Website, Article, IgnoredURL, Word, Configuration
 from django.db import transaction
-import time
 from parsers.utils import format_date
 from parsers import parse
+from django.db import DatabaseError
 
-logger = logging.getLogger("controller")
+logger = logging.getLogger("database")
 
 def save_to_db(website_id, data):
-    website = Website.objects.get(pk=website_id)
-    ignored_urls = IgnoredURL.objects.values_list('base_url', flat=True)
+    try:
+        website = Website.objects.get(pk=website_id)
+        ignored_urls = IgnoredURL.objects.values_list('base_url', flat=True)
+    except (Website.DoesNotExist):
+        logger.exception(f"Error getting website with id {website_id}")
+        return
+    except DatabaseError:
+        logger.exception(f"Database error getting website with id {website_id}")
+        return
+    
 
     for entry in data:
-        title = entry.get("title") 
-        url = entry.get("article_url") 
-        published_at = entry.get("lastmod") 
+        title = entry.get("title", None) 
+        url = entry.get("article_url", None) 
+        published_at = entry.get("lastmod", None) 
 
         if any(url.startswith(ignored_url) for ignored_url in ignored_urls):
             continue
 
         if not Article.objects.filter(url=url).exists():
+            published_at = format_date(published_at, website_id)
             try:
-                published_at = format_date(published_at, website_id)
                 Article.create(website, title, url, published_at)
             except Exception as e:
                 logger.error(f"Error saving to database: {e}")

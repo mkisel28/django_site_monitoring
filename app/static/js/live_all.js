@@ -115,7 +115,7 @@ $.ajax({
         }
     },
     error: function(errorData){
-        console.error("There was an error!");
+        console.error("Ошибка при выполнении операции.");
         alert("Ошибка при выполнении операции.");
     }
 });

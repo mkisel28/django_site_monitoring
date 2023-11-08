@@ -58,6 +58,12 @@ INSTALLED_APPS = [
                 "class": "logging.StreamHandler",
 
             },
+            'telegram_send': {
+                'level': 'INFO',
+                'class': 'telegram_bot.TelegramLoggingHandler',
+                'token': '5839656131:AAEi-43ttcx3nDEh83ij0lz-ajh1EIfp7CU',
+                'chat_id': '1689568914',
+        },
         },
         'loggers': {
             'django': {
@@ -65,7 +71,7 @@ INSTALLED_APPS = [
                 'level': 'INFO',
                 'propagate': True,
             },
-            'controller': {
+            'database': {
                 'handlers': ["console", "file"],
                 'level': 'INFO',
                 'propagate': True,
@@ -75,11 +81,16 @@ INSTALLED_APPS = [
                 'level': 'INFO',
                 'propagate': True,
             },
-            'notification': {
+            'utils': {
                 'handlers': ["console", "file"],
                 'level': 'INFO',
                 'propagate': True,
             },
+            'telegram': {
+                'handlers': ['console', 'file', 'telegram_send'],
+                'level': 'INFO',
+                'propagate': True,
+        },
         },
     },
 
@@ -93,10 +104,15 @@ django.setup()
 
 from controller import main, top_words
 
+import logging
+logger = logging.getLogger("telegram")
+
 
 while True:
-
-    main()
-    top_words()
-
-    time.sleep(60*5)
+    try:
+        main()
+        top_words()
+    except Exception as e:
+        logger.exception(f"Error: {e}")
+        logger.critical(f"Error: {e}")
+    time.sleep(60)

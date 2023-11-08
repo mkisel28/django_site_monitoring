@@ -4,7 +4,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
 from parser_app.parsers.search.test import find_rss_sitemap, get_rss_feed_info
 from main.models import TrackedWord, TrackedWordMention
 from .forms import RegistrationForm, TrackedWordForm, AddWebsiteForm, SitemapChoiceForm
@@ -12,6 +13,25 @@ from django.http import HttpResponseBadRequest
 from django.template.loader import render_to_string
 from main.models import Country
 
+def user_login(request):
+    if request.user.is_authenticated:
+        return redirect('/websites')
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return JsonResponse({'status': 'success', 'message': f'Привет, {username}! Вы успешно вошли в систему.'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Неправильное имя пользователя или пароль'}, status=401)
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
 
 def register(request):
     if request.method == 'POST':
@@ -19,9 +39,9 @@ def register(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            messages.success(
-                request, f'Аккаунт создан для {username}! Теперь вы можете войти в систему.')
-            return redirect('/')
+            return JsonResponse({'status': 'success', 'message': f'Аккаунт создан для {username}! Теперь вы можете войти в систему.'})
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
     else:
         form = RegistrationForm()
     return render(request, 'registration/register.html', {'form': form})

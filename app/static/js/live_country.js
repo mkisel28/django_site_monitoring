@@ -13,7 +13,6 @@ $(document).ready(function() {
     articles.forEach(function(article) {
         var formattedDate = formatDateTime(article.published_at);
         
-        // Используем поле "is_favorite" для определения иконки избранного
         var favoriteIcon = article.is_favorite ?
             `<a href="#" class="toggle-favorite" data-action="/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
             `<a href="#" class="toggle-favorite" data-action="/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
@@ -121,7 +120,7 @@ $.ajax({
         }
     },
     error: function(errorData){
-        console.error("There was an error!");
+        console.error("Ошибка при выполнении операции!");
         alert("Ошибка при выполнении операции.");
     }
 });

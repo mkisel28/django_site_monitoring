@@ -2,7 +2,49 @@
 {% load static %}
 
 {% block content %}
-    <h1>Websites</h1>
+<style>
+ 
+    .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+    }
+
+    .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        font-size: 17px;
+    }
+
+    .tab button:hover {
+        background-color: #ddd;
+    }
+
+    .tab button.active {
+        background-color: #ccc;
+    }
+
+    .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
+    }
+</style>
+
+<div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'Websites')">Сайты</button>
+    <button class="tablinks" onclick="openTab(event, 'Countries')">Страны</button>
+</div>
+
+<div id="Websites" class="tabcontent">
+    <h1>Сайты</h1>
+    {% include "main/filter_panel.html" %}
     <div class="websites">
         {% for website in websites %}
             <div class="website-block"  data-id ="{{website.id}}" data-url="{% url 'main:website_articles' website.id %}">
@@ -21,7 +63,31 @@
             </div>
         {% endfor %}
     </div>
+</div>
 
+<div id="Countries" class="tabcontent">
+    <h1>Страны</h1>
+    <!-- Ваш HTML код для блока Страны -->
+</div>
+<script>
+    // Функция для открытия вкладки
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    
+    // Получаем элемент с id="defaultOpen" и кликаем по нему
+    document.getElementsByClassName("tablinks")[0].click();
+    </script>
 
     <script src="{% static 'js/click.js' %}"  ></script>
     <script src="{% static 'js/scripts.js' %}"  ></script>
@@ -31,5 +97,3 @@
 
 
       {% endblock %}
-{% comment %} 
-      data-api="{% url 'main:api_article_list' website.id %}" {% endcomment %}

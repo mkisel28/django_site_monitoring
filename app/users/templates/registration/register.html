@@ -10,19 +10,141 @@
     
     <div class="image-container" style="background-image: url({% static 'file/login.jpg' %})">
         <div class="overlay">
+            <div class="text-conteiner-registration">
             <h1>Регистрация</h1>
-            <p>Уже зарегистрированы? <a href="{% url 'users:login' %}">Войти</a></p>
+            <h3>Уже зарегистрированы? <a href="{% url 'users:login' %}">Войти</a></h3>
         </div>
-
-
+        </div>
     </div>
 
     <div class="form-group">
-        <form method="post">
+        <form id="registrationForm" method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            <div class="form-group1">
+                <input type="text" class="form-control" name="username" id="username" placeholder='Login' required>
+            </div>
+
+            <div class="form-group1">
+                <input type="password" class="form-control" name="password" id="password" placeholder='Пароль' required>
+            </div>
+            <div class="form-group1">
+                <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" placeholder='Подтверждение пароля' required>
+            </div>
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <strong>Ошибка!</strong> Пожалуйста, исправьте следующие ошибки:
+                {{ form.errors }}
+            </div>
+            {% endif %}
             <button type="submit">Зарегистрироваться</button>
+
         </form>
+        <div id="alertPlaceholder" style=" text-align: center;"></div>
+
     </div>
+
+    <!-- Место для всплывающего уведомления -->
 </div>
+<style>
+    #alertPlaceholder {
+        position: absolute;
+        top: 10px; /* Расположим немного ниже верхнего края формы */
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: none;
+    }
+    
+    .alert {
+        padding: 10px;
+        color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .danger{
+        background-color: red;
+    }
+
+    .success{
+        background-color: green;
+    }
+    </style>
+<script>
+    function validatePassword(password) {
+        var errors = [];
+        if (password.length < 8) {
+            errors.push("Ваш пароль должен содержать не менее 8 символов."); 
+        }
+        if (password.search(/[a-z]/i) < 0) {
+            errors.push("Ваш пароль должен содержать хотя бы одну букву."); 
+        }
+        if (password.search(/[0-9]/) < 0) {
+            errors.push("Ваш пароль должен содержать хотя бы одну цифру."); 
+        }
+        if (password.search(/[^a-zA-Z0-9!@#$%^&*]/) >= 0) {
+            errors.push("Ваш пароль содержит недопустимые символы.");
+        }
+        return errors;
+    }
+    document.getElementById('registrationForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Предотвращаем обычную отправку формы
+    
+        var password = document.getElementById('password').value;
+        var confirmPassword = document.getElementById('confirmPassword').value;
+        var passwordErrors = validatePassword(password);
+        var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        // Показываем ошибки пароля, если они есть
+        if (passwordErrors.length > 0) {
+            showAlert(passwordErrors.join("<br>"), 'danger');
+            return;
+        }
+    
+        // Проверяем, совпадают ли пароли
+        if (password !== confirmPassword) {
+            showAlert('Пароли не совпадают.', 'danger');
+            return;
+        }   
+        $.ajax({
+            type: "POST",
+            url: "/register/",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                username: $('#username').val(), 
+                password1: $('#password').val(),
+                password2: $('#confirmPassword').val()
+            },
+            success: function(response) {
+                showAlert('Регистрация прошла успешно!', 'success');
+            setTimeout(function() {
+                    window.location.href = "{% url 'users:login' %}"; // перенаправление на страницу входа
+                }, 3000); // перенаправляем через 3 секунды
+},
+            error: function(xhr, status, error) {
+                var errors = JSON.parse(xhr.responseText).errors;
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        // Отображение ошибок валидации на странице
+                        console.error(key + ": " + errors[key]);
+                        showAlert(errors[key], 'danger');
+                    }
+                }
+                
+                 }
+             });
+
+
+        
+    });
+    function showAlert(message, stage) {
+        var alertPlaceholder = document.getElementById('alertPlaceholder');
+        alertPlaceholder.innerHTML = '<div class="alert  ' + stage + '">' + message + '</div>';
+        alertPlaceholder.style.display = 'block'; // Показываем уведомление
+    
+        // Через 3 секунды скрываем уведомление
+        setTimeout(function() {
+            alertPlaceholder.style.display = 'none';
+        }, 3000);
+    }
+    
+    </script>
 {% endblock %}

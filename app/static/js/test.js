@@ -13,7 +13,7 @@ $(document).ready(function() {
     articles.forEach(function(article) {
         var formattedDate = formatDateTime(article.published_at);
         
-        // Используем поле "is_favorite" для определения иконки избранного
+        
         var favoriteIcon = article.is_favorite ?
             `<a href="#" class="toggle-favorite" data-action="/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
             `<a href="#" class="toggle-favorite" data-action="/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
@@ -46,9 +46,17 @@ $('#startDate, #endDate').on('change', function() {
 });
 
   function updateArticlesWithClear() {
+    clearTimeout(updateTimer);
     var $list = $('.website-block ul');
     $list.empty();
     updateArticles();
+}
+
+var updateTimer;
+
+function scheduleNextUpdate() {
+  clearTimeout(updateTimer); // Очистка предыдущего таймера, если он был установлен
+  updateTimer = setTimeout(updateArticles, 12000); //следующее обновление через 12 секунд
 }
 
   function updateArticles() {
@@ -121,7 +129,7 @@ $('#startDate, #endDate').on('change', function() {
               });
 
               if (newArticles.length) {
-                  var excessArticles = $list.find('li').slice(100 - newArticles.length);
+                  var excessArticles = $list.find('li').slice(20 - newArticles.length); //11!!
                   excessArticles.fadeOut(400, function() {
                       $(this).remove();
                   });
@@ -130,12 +138,18 @@ $('#startDate, #endDate').on('change', function() {
                       addArticles($list, newArticles);
                   }, 1000);
               }
+              
+          },
+          error: function() {
+
+            
           }
       });
+      scheduleNextUpdate();
   }
-  $('#showOnlyFavorites').change(updateArticlesWithClear); // обновление статьи при изменении состояния чекбокса
+  $('#showOnlyFavorites').change(updateArticlesWithClear); // обновление статьи при изменении   чекбокса showOnlyFavorites
   updateArticles();
-  setInterval(updateArticles, 15000);  
+ 
 
   $(document).on('click', '.toggle-favorite', function(e) {
     e.preventDefault();
@@ -160,7 +174,7 @@ $.ajax({
         }
     },
     error: function(errorData){
-        console.error("There was an error!");
+        console.error("Ошибка при выполнении операции!");
         alert("Ошибка при выполнении операции.");
     }
 });

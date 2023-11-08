@@ -7,19 +7,122 @@
     
     <div class="image-container" style="background-image: url({% static 'file/login.jpg' %})">
         <div class="overlay">
-            <h1>Вход</h1>
-            <p>Еще не зарегистрированы? <a href="{% url 'users:register' %}">Регистрация</a></p>
+            <div class="text-conteiner-registration">
+                <h1>Вход</h1>
+                <h3>Еще не зарегистрированы? <a href="{% url 'users:register' %}">Регистрация</a></h3>
+        
+            </div>
         </div>
+        
 
 
     </div>
 
-    <div class="form-group">
+    {% comment %} <div class="form-group">
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">Войти</button>
-        </form>
+        </form> {% endcomment %}
+
+        <div class="form-group">
+            <form id="loginForm" method="post">
+                {% csrf_token %}
+                <div class="form-group1">
+                    <input type="text" class="form-control" name="username" id="username" placeholder='Login' required>
+                </div>
+        
+                <div class="form-group1">
+                    <input type="password" class="form-control" name="password" id="password" placeholder='Пароль' required>
+                </div>
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Ошибка!</strong> Пожалуйста, исправьте следующие ошибки:
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+                <button type="submit">Войти</button>
+            </form>
+            <div id="alertPlaceholder" style=" text-align: center;"></div>
+        </div>
     </div>
 </div>
+
+<style>
+    #alertPlaceholder {
+        position: absolute;
+        top: 10px; /* Расположим немного ниже верхнего края формы */
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: none;
+    }
+    
+    .alert {
+        padding: 10px;
+        color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .danger{
+        background-color: red;
+    }
+
+    .success{
+        background-color: green;
+    }
+    </style>
+<script>
+
+
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault(); 
+    
+        var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+
+
+
+        $.ajax({
+            type: "POST",
+            url: "/",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                username: $('#username').val(), 
+                password: $('#password').val(),
+            },
+            success: function(response) {
+                showAlert('Успешно!', 'success');
+            setTimeout(function() {
+                    window.location.href = "{% url 'users:login' %}"; // перенаправление на страницу входа
+                }, 2000); // перенаправляем через 3 секунды
+},
+            error: function(xhr, status, error) {
+                var errors = JSON.parse(xhr.responseText).errors;
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        // Отображение ошибок валидации на странице
+                        console.error(key + ": " + errors[key]);
+                        showAlert(errors[key], 'danger');
+                    }
+                }
+                
+                 }
+             });
+
+
+        
+    });
+    function showAlert(message, stage) {
+        var alertPlaceholder = document.getElementById('alertPlaceholder');
+        alertPlaceholder.innerHTML = '<div class="alert  ' + stage + '">' + message + '</div>';
+        alertPlaceholder.style.display = 'block'; // Показываем уведомление
+    
+        // Через 3 секунды скрываем уведомление
+        setTimeout(function() {
+            alertPlaceholder.style.display = 'none';
+        }, 3000);
+    }
+    
+    </script>
 {% endblock %}

@@ -94,7 +94,7 @@ $(document).ready(function() {
             }
         });
     }
-    $('#showOnlyFavorites').change(updateArticlesWithClear); // Обновление списка при изменении флажка "Только избранное"
+    $('#showOnlyFavorites').change(updateArticlesWithClear);
     updateArticles();
     setInterval(updateArticles, 15000);  
   
