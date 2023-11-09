@@ -5,8 +5,8 @@ from django.utils import timezone
 
 from django.contrib.auth.models import User
 
-from utils.service_utils import check_and_send_notifications, translate_text
-from utils.text_helpers import get_normalized_words_from_text
+from .utils.service_utils import check_and_send_notifications, translate_text
+from .utils.text_helpers import get_normalized_words_from_text
 
 
 logger = logging.getLogger("models")

@@ -1,5 +1,5 @@
 import logging
-from models import Website, Article, IgnoredURL, Word, Configuration
+from .models import Website, Article, IgnoredURL, Word, Configuration
 from django.db import transaction
 from parsers.utils import format_date
 from parsers import parse
