@@ -1,44 +1,167 @@
 
+<style>
+    .tabs-management {
+        width: 80%;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .existing-tabs, .create-tab {
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        padding: 15px;
+    }
+
+    .tab {
+        margin-bottom: 10px;
+    }
+
+    .tab span {
+        margin-right: 10px;
+    }
+
+    .tab button {
+        margin-right: 5px;
+    }
+
+    #create-tab-form input {
+        margin-bottom: 10px;
+        display: block;
+        width: 100%;
+        padding: 8px;
+    }
+
+    #create-tab-form button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    #create-tab-form button:hover {
+        background-color: #0056b3;
+    }
+</style>
 
  
 <div class="card mt-4">
   <div class="card-header cardToggle">
-      <h3>Добавить новый сайт</h3>
+      <h3>Управление вкладками</h3>
       <span class="float-right toggleText">Свернуть &#9650;</span>
   </div>
+  
   <div class="card-body width-100 button-wite" style="display: none;">
-    <form id="create-tab-form" method="post" action="">
-      {% csrf_token %} <!-- Include CSRF token for security -->
-      <div>
-          <label for="tab-name">Название вкладки:</label>
-          <input type="text" id="tab-name" name="tab_name" required>
-      </div>
-      <div id="websites-selector">
-          <label>Сайты:</label>
-          <select name="websites" multiple>
-              {% for website in websites %}
-                  <option value="{{ website.id }}">{{ website.name }}</option>
-              {% endfor %}
-          </select>
-      </div>
-      <div id="countries-selector">
-          <label>Страны:</label>
-          <select name="countries" multiple>
-              {% for country in countries %}
-                  <option value="{{ country.id }}">{{ country.name }}</option>
-              {% endfor %}
-          </select>
-      </div>
-      <div id="tracked-words-selector">
-          <label>Отслеживаемые слова:</label>
-          <select name="tracked_words" multiple>
-              {% for word in tracked_words %}
-                  <option value="{{ word.id }}">{{ word.keyword }}</option>
-              {% endfor %}
-          </select>
-      </div>
-      <div>
-          <button type="submit">Создать вкладку</button>
-      </div>
-    </form>
+    <div class="tabs-management">
+
+        <!-- Секция для просмотра и управления существующими вкладками -->
+        <div class="existing-tabs">
+            <h2>Существующие вкладки</h2>
+            <div id="tabs-list">
+                <!-- Здесь будет динамически загружаться список вкладок -->
+                <!-- Пример структуры для одной вкладки -->
+                <!-- <div class="tab">
+                    <span>Название вкладки</span>
+                    <button class="edit-tab">Редактировать</button>
+                    <button class="delete-tab">Удалить</button>
+                </div> -->
+            </div>
+        </div>
+        <div class="create-tab">
+            <h2>Создать новую вкладку</h2>
+            <form id="create-tab-form" method="post" action="">
+            {% csrf_token %} <!-- Include CSRF token for security -->
+            <div>
+                <label for="tab-name">Название вкладки:</label>
+                <input type="text" id="tab-name" name="tab_name" required>
+            </div>
+            <div id="websites-selector">
+                <label>Сайты:</label>
+                    <div id="country-filter">
+                        <label for="country-filter-select">Фильтр по стране:</label>
+                        <select id="country-filter-select" onchange="filterWebsitesByCountry()">
+                            <option value="all">Все</option>
+                            {% for country in countries %}
+                                <option value="{{ country.id }}">{{ country.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                <select name="websites" id="websites-select" multiple>
+                    {% for website in websites %}
+                        <option value="{{ website.id }}" data-country="{{ website.country.id }}">{{ website.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="countries-selector">
+                <label>Страны:</label>
+                <select name="countries"id="countries-select" multiple>
+                    {% for country in countries %}
+                        <option value="{{ country.id }}">{{ country.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="tracked-words-selector">
+                <label>Отслеживаемые слова:</label>
+                <select name="tracked_words" multiple>
+                    {% for word in tracked_words %}
+                        <option value="{{ word.id }}">{{ word.keyword }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button type="submit">Создать вкладку</button>
+            </div>
+            </form>
+        </div>
+    </div>
   </div>
+
+
+  <script>
+    function filterWebsitesByCountry() {
+        var selectedCountry = document.getElementById('country-filter-select').value;
+        var websites = document.getElementById('websites-select').options;
+        for (var i = 0; i < websites.length; i++) {
+            var website = websites[i];
+            if (selectedCountry === 'all' || website.getAttribute('data-country') === selectedCountry) {
+                website.style.display = '';
+            } else {
+                website.style.display = 'none';
+            }
+        }
+    }
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#create-tab-form').submit(function(event) {
+            event.preventDefault(); // Предотвращение стандартной отправки формы
+
+            var data = {
+                'name': $('#tab-name').val(),
+                'websites': $('#websites-select').val(), // Убедитесь, что у select-элемента есть id="websites-select"
+                'countries': $('#countries-select').val(), // Аналогично для стран
+                'tracked_words': $('#tracked-words-select').val() // И для отслеживаемых слов
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/api/tabs/create/', // URL вашей API-точки для создания вкладок
+                data: JSON.stringify(data),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function(response) {
+                    console.log('Вкладка создана: ', response);
+                    // Обработка успешного ответа (например, обновление интерфейса)
+                },
+                error: function(error) {
+                    console.error('Ошибка при создании вкладки: ', error);
+                    // Обработка ошибки
+                }
+            });
+        });
+    });
+</script>

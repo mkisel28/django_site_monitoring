@@ -50,13 +50,7 @@ class AddWebsiteForm(forms.ModelForm):
             'language': forms.TextInput(attrs={'placeholder': 'Язык (например, ru)'}),
         }
 
-def gey():
-  print()
 
-print()
-
-def gey():
-    print()
 
 class URLInputForm(forms.Form):
     url = forms.URLField(label='Введите URL сайта', widget=forms.URLInput(attrs={'placeholder': 'https://example.com'}))

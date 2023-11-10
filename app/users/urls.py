@@ -26,4 +26,5 @@ urlpatterns = [
 
     path('toggle_telegram_notifications/', views.toggle_telegram_notifications, name='toggle_telegram_notifications'),
 
+    path('api/tabs/create/', views.api_manage_tab, name='api-create-tab'),
 ]

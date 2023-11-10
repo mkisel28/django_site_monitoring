@@ -1,4 +1,5 @@
 
+import json
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -11,7 +12,9 @@ from main.models import TrackedWord, TrackedWordMention
 from .forms import RegistrationForm, TrackedWordForm, AddWebsiteForm, SitemapChoiceForm
 from django.http import HttpResponseBadRequest
 from django.template.loader import render_to_string
-from main.models import Country
+from main.models import Country, Website
+from django.db.models import Q
+from .models import Tab
 
 def user_login(request):
     if request.user.is_authenticated:
@@ -50,7 +53,10 @@ def register(request):
 @login_required
 def manage_tracked_words(request):
     words = TrackedWord.objects.filter(user=request.user)
-
+    countries = Country.objects.all()
+    websites = Website.objects.filter(
+        Q(user=request.user) | Q(user=None) 
+        )
     # Создаем список словарей с каждым словом и его количеством упоминаний
     words_with_counts = []
     for word in words:
@@ -61,7 +67,27 @@ def manage_tracked_words(request):
         })
 
     form = TrackedWordForm()
-    return render(request, 'users/d.html', {'form': form, 'words_with_counts': words_with_counts})
+    return render(request, 'users/d.html', {'form': form, 
+                                            'words_with_counts': words_with_counts,
+                                            'countries': countries,
+                                            'websites': websites})
+
+
+def api_manage_tab(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        
+        tab = Tab.objects.create(user=request.user, name=data['name'])
+        
+        for website_id in data.get('websites', []):
+            print(type(int(website_id)), int(website_id))
+            tab.add_website(int(website_id))
+        for country_id in data.get('countries', []):
+            tab.add_country(country_id)
+        for tracked_word_id in data.get('tracked_words', []):
+            tab.add_tracked_word(tracked_word_id)
+        return JsonResponse({'status': 'success', 'message': 'Вкладка успешно создана.'})
+
 
 @login_required(login_url="/")
 def fetch_sitemaps(request):
