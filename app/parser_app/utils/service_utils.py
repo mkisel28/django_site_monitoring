@@ -7,7 +7,7 @@ from deep_translator.exceptions import TranslationNotFound
 
 
 
-logger = logging.getLogger("notification")
+logger = logging.getLogger("utils")
 
 
 def translate_text(from_lang: str, to_translate: str) -> str:
