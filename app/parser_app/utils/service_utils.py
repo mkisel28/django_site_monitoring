@@ -25,6 +25,8 @@ def translate_text(from_lang: str, to_translate: str) -> str:
     for i in range(MAX_RETRIES):
         try:
             translated_text = GoogleTranslator(source=from_lang, target='ru').translate(to_translate)
+            logger.info(f"Попытка перевода №{i+1}. успешно.")
+
             return translated_text
         except TranslationNotFound:
             logger.error(f"Попытка перевода №{i+1}. Ошибка перевода.")

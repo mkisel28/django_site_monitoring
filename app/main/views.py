@@ -518,7 +518,7 @@ def test(request):
         'website__id',
         'website__country__name',
         'is_favorite'
-    )[:10]
+    )[:100]
 
     articles = create_articles(articles)[::-1]
 
