@@ -27,7 +27,7 @@ pip install -r requirements.txt
 3. Создайте файл `config.cfg` в корневом каталоге с вашим токеном Telegram-бота и ключом RapidAPI.
 
 `Пример config.cfg`:
-````
+```
 [RAPIDAPI]
 API_KEY = Ваш_RapidAPI_Ключ
 API_HOST = hotels4.p.rapidapi.com
@@ -41,7 +41,7 @@ TOKEN = Ваш_Telegram_Бот_Токен
 
 
 4. Запустите бота:
-python main.py
+```python main.py```
 
 ## Использование
 После запуска бота вы можете взаимодействовать с ним в Telegram. Используйте следующие команды:
