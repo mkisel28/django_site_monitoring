@@ -366,27 +366,27 @@ def articles_for_related_data(request, data_id, data_type):
     # Применение аннотаций и возвращение результатов
     articles = base_query.filter(
         Q(website__user=None) | Q(website__user=request.user)
-    ).annotate(
-        is_favorite=Exists(
-            Website.objects.filter(
-                id=OuterRef('website_id'),
-                favorited_by=request.user
-            )
-        )
-    ).values('id',
-             'title',
-             'title_translate',
-             'url',
-             'website__name',
-             'website__id',
-             'website__country__name',
-             'published_at',
-             'is_favorite')[:count_filter]
-
-    articles = create_articles(articles)[::-1]
+        ).annotate(
+            is_favorite=Exists(
+                Website.objects.filter(
+                    id=OuterRef('website_id'), favorited_by=request.user
+                                      )
+                                )
+                    ).order_by("-published_at"
+                               ).values('id',
+                                        'title',
+                                        'title_translate',
+                                        'url',
+                                        'website__name',
+                                        'website__id',
+                                        'website__country__name',
+                                        'published_at',
+                                        'is_favorite')[:count_filter]
 
     if len(articles) == 0:
         return JsonResponse({'error': 'Ничего не найдено'})
+    
+    articles = create_articles(articles)[::-1]
 
     return JsonResponse({'articles': list(articles)})
 
