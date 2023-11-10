@@ -1,32 +1,6 @@
-<style>
-  input[type="text"], input[type="url"], input[type="password"], input[type="email"], select, textarea {
-    font: 15px/24px "Lato", Arial, sans-serif;
-    color: #333;
-    width: 100%;
-    box-sizing: border-box;
-    letter-spacing: 1px;
-    padding: 10px 15px;
-    margin: 10px 0;
-    border: 2px solid #ffffff;
-    border-bottom: 2px solid #656565;
-}
-.select2-container .select2-selection--single,
-.select2-container--default .select2-selection--multiple {
-    font: 15px/24px "Lato", Arial, sans-serif;
-    border: 2px solid #ffffff;
-    border-bottom: 2px solid #656565;
-    border-radius: 0; /* Remove this if you want the default Select2 border radius */
-} /*
-  }
-</style>
-    <!-- Include Select2 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
-    <!-- Include jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-    <!-- Include Select2 JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+ 
 <div class="card mt-4">
   <div class="card-header cardToggle">
       <h3>Добавить новый сайт</h3>
@@ -41,7 +15,7 @@
       </div>
       <div id="websites-selector">
           <label>Сайты:</label>
-          <select name="websites" multiple class="select2">
+          <select name="websites" multiple>
               {% for website in websites %}
                   <option value="{{ website.id }}">{{ website.name }}</option>
               {% endfor %}
@@ -49,7 +23,7 @@
       </div>
       <div id="countries-selector">
           <label>Страны:</label>
-          <select name="countries" multiple class="select2">
+          <select name="countries" multiple>
               {% for country in countries %}
                   <option value="{{ country.id }}">{{ country.name }}</option>
               {% endfor %}
@@ -57,7 +31,7 @@
       </div>
       <div id="tracked-words-selector">
           <label>Отслеживаемые слова:</label>
-          <select name="tracked_words" multiple class="select2">
+          <select name="tracked_words" multiple>
               {% for word in tracked_words %}
                   <option value="{{ word.id }}">{{ word.keyword }}</option>
               {% endfor %}
@@ -68,12 +42,3 @@
       </div>
     </form>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/select2/dist/js/select2.min.js"></script>
-<script>
-    // Initialize Select2 elements
-    $('.select2').select2();
-    width: 'resolve',
-    border: 'resolve',
-    // Additional JavaScript for form submission and dynamic changes can be added here
-</script>
