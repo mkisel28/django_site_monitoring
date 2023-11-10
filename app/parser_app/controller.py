@@ -1,9 +1,16 @@
+from datetime import  timedelta
+from collections import Counter
 import logging
+
 from models import Website, Article, IgnoredURL, Word, Configuration
 from django.db import transaction
+from django.db import DatabaseError
+from django.utils import timezone
+
+import concurrent.futures
+
 from parsers.utils import format_date
 from parsers import parse
-from django.db import DatabaseError
 
 logger = logging.getLogger("database")
 
@@ -62,9 +69,9 @@ def save_to_db(website_id, data):
 #     if data:
 #         save_to_db(id, data)
 
-import threading
 
-def worker(website, thread_n):
+def worker(website):
+    thread_n = website.id
     logger.info(f'[{thread_n}] Начал парсинг сайта: {website.name}')
 
     sitemap_url = website.sitemap_url
@@ -77,23 +84,14 @@ def worker(website, thread_n):
         else: 
             logger.warning(f"[{thread_n}] Пустой парсинг controller.py: {website}" )
 
+            
 
 def main():
     websites = Website.objects.all()
-    threads = []
-    for website in websites:
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        executor.map(worker, websites)
 
-        thread_n = website.id
-        t = threading.Thread(target=worker, args=(website,thread_n))
-        threads.append(t)
-        t.start()
-        if len(threads) >= 20:  # Если активно 10 потоков, ожидаем их завершения
-            for t in threads:
-                t.join()
-            threads = []  # Очищаем список потоков
-    # Ожидаем завершения оставшихся потоков
-    for t in threads:
-        t.join()
     logger.info("COMPLETED PARSING ALL SITES")
 
 
@@ -101,12 +99,8 @@ def main():
 
 
 
-from django.utils import timezone
 
-from datetime import  timedelta
-from collections import Counter
-
-# 1. Отфильтруйте статьи за последний час.
+#   фильтрует статьи за последний час
 def top_words():
     config = Configuration.objects.first() 
     HOURS = config.hours
@@ -128,7 +122,7 @@ def top_words():
     Word.objects.filter(timestamp__lt=cutoff_time).delete()
 
 
-    # Сохранение слов и их частот в базе данных
+    # Сохранение слов и их частоты в базу данных
     for word_text, count in top_10_words:
         word = Word(text=word_text, frequency=count)
         word.save() 
@@ -139,8 +133,4 @@ def top_words():
                     word.articles.add(article)
 
         word.save()
-    # word_query = "счёт"
-    # word_obj = Word.objects.get(text=word_query)
-    # related_articles = word_obj.articles.all()
-    # return top_10_words, related_articles
 

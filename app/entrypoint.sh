@@ -12,11 +12,12 @@ then
 
     echo "DB did run."
 fi
+python manage.py migrate
 
 if [ ! -f "db_loaded.txt" ]; then
     python manage.py loaddata db.json
     touch db_loaded.txt
 fi 
-python manage.py migrate
+
 gunicorn  site_main.wsgi:application --bind 0.0.0.0:8000
 exec "$@"

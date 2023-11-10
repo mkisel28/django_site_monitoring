@@ -1,4 +1,3 @@
-redis-server
 pymorphy2
 beautifulsoup4
 deep-translator
