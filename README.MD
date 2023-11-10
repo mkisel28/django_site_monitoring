@@ -26,8 +26,8 @@ docker-compose up -d
 pip install -r requirements.txt
 3. Создайте файл `config.cfg` в корневом каталоге с вашим токеном Telegram-бота и ключом RapidAPI.
 
-`Пример config.cfg`:
-```
+
+```Пример config.cfg
 [RAPIDAPI]
 API_KEY = Ваш_RapidAPI_Ключ
 API_HOST = hotels4.p.rapidapi.com
