@@ -129,7 +129,7 @@ function scheduleNextUpdate() {
               });
 
               if (newArticles.length) {
-                  var excessArticles = $list.find('li').slice(20 - newArticles.length); //11!!
+                  var excessArticles = $list.find('li').slice(-newArticles.length); //11!!
                   excessArticles.fadeOut(400, function() {
                       $(this).remove();
                   });
