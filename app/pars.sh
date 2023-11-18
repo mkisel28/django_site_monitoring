@@ -12,4 +12,8 @@ then
 
     echo "DB did run."
 fi
+echo "parser app wait 30s..."
+
+sleep 30
+echo "Start parser app..."
 python parser_app/main.py

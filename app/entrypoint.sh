@@ -1,5 +1,5 @@
-#!/bin/sh
-chmod +x entrypoint.sh
+#!/bin/bash
+
 if [ "$DATABASE" = "postgres" ]
 then
     # если база еще не запущена
