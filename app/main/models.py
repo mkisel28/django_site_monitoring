@@ -18,7 +18,7 @@ class UserProfile(models.Model):
     telegram_notifications = models.BooleanField(default=False)
     
     def __str__(self):
-        return self.user
+        return self.user.username  
     
 
 class IgnoredURL(models.Model):
