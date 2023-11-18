@@ -11,14 +11,8 @@
           <button type="submit" class="btn btn-success">Добавить слово</button>
       </form>
 
-      <ul id="wordList" class="list-group">
-          {% for item in words_with_counts %}
-          <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ item.word.id }}">
-              {{ item.word.keyword }}
-              <span class="badge badge-primary badge-pill">{{ item.count }}</span>
-              <button class="btn btn-danger btn-sm deleteWord">Удалить</button>
-          </li>
-          {% endfor %}
+      {% include "users/module/submodule/trecking_word_list.html" %}
+
       </ul>
   </div>
 </div>

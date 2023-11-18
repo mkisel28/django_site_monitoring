@@ -1,9 +1,9 @@
 <div class="card mt-4">
   <div class="card-header cardToggle">
       <h3>Настройки оповещений в Telegram</h3>
-      <span class="float-right toggleText" onclick="toggleCardBody()">Развернуть &#9660;</span>
+      <span class="float-right toggleText" onclick="toggleCardBody()">Свернуть &#9650;</span>
   </div>
-  <div class="card-body" style="display: none;">
+  <div class="card-body" style="display: block;">
       <form id="telegramNotificationForm" method="post" action="{% url 'users:toggle_telegram_notifications' %}">
           {% csrf_token %}
           <div class="form-group">
@@ -35,16 +35,3 @@
       </form>
   </div>
 </div>
-{% comment %} <script>
-    $(document).ready(function() {
-        $(".cardToggle").click(function() {
-          $(".card-body").toggle();
-      
-          if ($(".card-body").is(":visible")) {
-            $(".toggleText").html("Свернуть &#9650;");
-          } else {
-            $(".toggleText").html("Развернуть &#9660;");
-          }
-        });
-      });
-</script> {% endcomment %}
