@@ -55,6 +55,15 @@ services:
     depends_on:
       - web
 
+  classification:
+    build: ./classification
+    environment:
+      - POSTGRES_DB=website_parsing
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Maksim2001
+      - POSTGRES_HOST=db
+    depends_on:
+      - db
 
 volumes:
   pgdata:

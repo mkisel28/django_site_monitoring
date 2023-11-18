@@ -1,0 +1,226 @@
+{% extends 'users/static/base.html'  %}
+{% load static %}
+{% block content %}
+<section class="dashboard">
+<style>
+    #wordList .list-group-item {
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 5px;
+      background: #f8f9fa;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    #wordList .modal-body {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+    <div class="top">
+      <i class="uil uil-bars sidebar-toggle"></i>
+
+      <!--<img src="images/profile.jpg" alt="">-->
+    </div>
+    <div class="dash-content">
+      <div class="my-sites">
+        <div class="title">
+          <i class="uil uil-sitemap"></i>
+          <span class="text">Мои вкладки</span>
+        </div>
+      </div>
+
+      <ul id="wordList" class="list-group">
+        {% csrf_token %}
+        {% for tab in my_tabs %}
+        <li class="list-group-item" data-id="{{ tab.id }}">
+          <div class="d-flex justify-content-between align-items-center">
+            <span>{{ tab.name }}</span>
+            <button class="btn btn-primary btn-sm viewDetails">Посмотреть</button>
+            <button class="btn btn-danger btn-sm deleteWord">Удалить</button>
+          </div>
+
+          <!-- Скрытый блок с дополнительной информацией -->
+          <div class="tab-details" style="display: none;">
+            <div class="form-group">
+              <label>Сайты:</label>
+              <select class="form-control select2 website-select" multiple="multiple">
+                {% for website in all_websites %}
+                <option value="{{ website.id }}" {% if website in tab.get_websites %} selected="selected" {% endif %}>
+                  {{ website.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Страны:</label>
+              <select class="form-control select2 country-select" multiple="multiple">
+                {% for country in all_countries %}
+
+                <option value="{{ country.id }}" {% if country in tab.get_countries %} selected="selected" {% endif %}>
+                  {{ country.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Отслеживаемые слова:</label>
+              <select class="form-control select2 word-select" multiple="multiple">
+                {% for tracked_word in all_tracked_words %}
+                <option value="{{ tracked_word.id }}" {% if tracked_word in tab.get_tracked_words%} selected="selected"
+                  {% endif %}>
+                  {{ tracked_word.keyword }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <button class="btn btn-success btn-sm updateTab">Обновить</button>
+          </div>
+        </li>
+        {% empty %}
+        <li class="list-group-item">У вас нет подборок. Создайте.</li>
+        {% endfor %}
+      </ul>
+
+      <div class="title">
+        <i class="uil uil-sitemap"></i>
+        <span class="text">Создать вкладку</span>
+      </div>
+      {% include "users/module/tabs_form.html" %}
+
+    </div>
+
+
+    {% include "users/module/submodule/notificationModal.html" %}
+
+
+    </section>
+
+<script>
+  $(document).ready(function() {
+      $('.cardToggle').on('click', function() {
+          const cardBody = $(this).next('.card-body');
+          const toggleText = $(this).find('.toggleText');
+  
+          cardBody.slideToggle('slow', function() {
+              if (cardBody.is(':visible')) {
+                  toggleText.html("Свернуть &#9650;");
+              } else {
+                  toggleText.html("Развернуть &#9660;");
+              }
+          });
+      });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.toggle-details').forEach(function (toggle) {
+      toggle.addEventListener('click', function () {
+        var siteDetails = this.closest('.box').querySelector('.site-details');
+        if (siteDetails) {
+          siteDetails.classList.toggle('active');
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+const body = document.querySelector("body"),
+  modeToggle = body.querySelector(".mode-toggle");
+sidebar = body.querySelector("nav");
+sidebarToggle = body.querySelector(".sidebar-toggle");
+let getMode = localStorage.getItem("mode");
+if (getMode && getMode === "dark") {
+  body.classList.toggle("dark");
+}
+let getStatus = localStorage.getItem("status");
+if (getStatus && getStatus === "close") {
+  sidebar.classList.toggle("close");
+}
+modeToggle.addEventListener("click", () => {
+  body.classList.toggle("dark");
+  if (body.classList.contains("dark")) {
+    localStorage.setItem("mode", "dark");
+  } else {
+    localStorage.setItem("mode", "light");
+  }
+});
+sidebarToggle.addEventListener("click", () => {
+  sidebar.classList.toggle("close");
+  if (sidebar.classList.contains("close")) {
+    localStorage.setItem("status", "close");
+  } else {
+    localStorage.setItem("status", "open");
+  }
+})
+
+
+</script>
+<script>
+  $(document).ready(function () {
+    $('.select2').select2({
+      tags: true,
+      width: '100%',
+    });
+
+    $('.viewDetails').click(function () {
+      var details = $(this).closest('.list-group-item').find('.tab-details');
+      details.toggle();
+      $(this).text(details.is(':visible') ? 'Скрыть' : 'Посмотреть');
+    });
+
+    $('.updateTab').click(function () {
+      var listItem = $(this).closest('.list-group-item');
+      var tabId = listItem.data('id');
+      var selectedWebsites = listItem.find('.website-select').val();
+      var selectedCountries = listItem.find('.country-select').val();
+      var selectedWords = listItem.find('.word-select').val();
+      var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+      var details = listItem.find('.tab-details');
+      var viewDetailsButton = listItem.find('.viewDetails');
+      // Скрыть 'tab-details'
+
+      $.ajax({
+        url: '/api/update-tab/', // URL для обновления вкладки
+        type: 'POST',
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        data: {
+          'tab_id': tabId,
+          'websites': selectedWebsites,
+          'countries': selectedCountries,
+          'tracked_words': selectedWords
+        },
+        success: function (response) {
+          // $('#notificationModal .modal-body').html('<div class="checkmark"></div>Данные успешно обновлены!');
+          // $('#notificationModal').modal('show');
+          Swal.fire({
+            title: 'Отлично',
+            text: 'Данные обновленны',
+            icon: 'success',
+            confirmButtonText: 'Закрыть'
+          })
+          details.toggle();
+          viewDetailsButton.text('Посмотреть');
+
+        },
+        error: function (response) {
+          //  $('#notificationModal .modal-body').text(response.responseJSON.message);
+          //  $('#notificationModal').modal('show');
+          Swal.fire({
+            title: 'Ууупс',
+            text: 'Что-то пошло не так',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          })
+        }
+      });
+    });
+  });
+</script>
+
+
+{% endblock %}

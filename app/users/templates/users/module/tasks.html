@@ -1,0 +1,195 @@
+<style>
+  .badge {
+      transition: var(--tran-05);
+    }
+    .highlight {
+      animation: highlightAnimation 1.5s;
+    }
+    
+    @keyframes highlightAnimation {
+      0%, 100% { background-color: transparent; }
+      50% { background-color: #0e4bf1ba; }
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -250px; /* Скрыта за левым краем экрана */
+      width: 250px;
+      height: 100%;
+      background-color: #f1f1f1;
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding: 20px;
+      z-index: 999;
+  }
+  
+  .sidebar.active {
+      right: 0; 
+  }
+  </style>
+
+  <button id="openSidebar">Фильтры</button>
+  <aside id="sidebar" class="sidebar">
+      <div class="filters d-flex boxes">
+
+          <div class="filter-date">
+              <label for="dateFilter">Дата:</label>
+              <input type="date" id="dateFilter" name="dateFilter">
+          </div>
+      
+          <!-- Фильтр по статусу -->
+          <div class="filter-status">
+              <label for="statusFilter">Статус:</label>
+              <select id="statusFilter" name="statusFilter" multiple>
+                  <option value="pending">Отложено</option>
+                  <option value="in_progress">В Процессе</option>
+                  <option value="completed">Отработано</option>
+              </select>
+          </div>
+      
+          <!-- Фильтр по приоритету -->
+          <div class="filter-priority">
+              <label for="priorityFilter">Приоритет:</label>
+              <select id="priorityFilter" name="priorityFilter" multiple>
+                  <option value="1">Низкий</option>
+                  <option value="2">Средний</option>
+                  <option value="3">Высокий</option>
+              </select>
+          </div>
+          <div>
+              <button class="menu-close-aside" aria-label="Close navigation menu">✕Закрыть</button>
+          </div>
+      </div>
+  </aside>
+
+  
+<ul id="taskList" class="list-group overflow">
+  <!-- Здесь будут отображаться задачи из submodule task_list   -->
+</ul>
+
+<script>
+  $(document).ready(function () {
+
+      $('#statusFilter').select2({
+          placeholder: "Выберите сайты",
+          width: '50%',
+          allowClear: true
+
+      });
+      $('#priorityFilter').select2({
+          placeholder: "Выберите ключевые слова",
+          width: '50%',
+          allowClear: true
+
+      });
+  });
+  document.addEventListener('DOMContentLoaded', function () {
+      var menuToggle = document.getElementById('openSidebar');
+      var menuClose = document.querySelector('.menu-close-aside');
+      var sidebar = document.getElementById('sidebar');
+  
+      // Открытие боковой панели
+      menuToggle.addEventListener('click', function () {
+          sidebar.classList.add('active');
+      });
+  
+      // Закрытие боковой панели с кнопки внутри панели
+      menuClose.addEventListener('click', function () {
+          sidebar.classList.remove('active');
+      });
+  
+      // Закрытие боковой панели при клике вне её
+      document.addEventListener('click', function (event) {
+          if (!sidebar.contains(event.target) && event.target !== menuToggle) {
+              sidebar.classList.remove('active');
+          }
+      });
+  });
+
+  function loadTasks() {
+    var statusFilter = document.getElementById('statusFilter').value;
+    var priorityFilter = document.getElementById('priorityFilter').value;
+
+    $.ajax({
+        url: '/api/tasks/info',
+        data: {
+            status: statusFilter,
+            priority: priorityFilter
+        },
+        success: function(data) {
+            $('#taskList').html(data.html);
+        }
+    });
+}
+
+// Привязка события к фильтрам
+$('#statusFilter, #priorityFilter').on('change', loadTasks);
+
+// Загрузка задач при инициализации страницы
+loadTasks();
+
+
+</script>
+<script>
+  $(document).ready(function () {
+      $('.cardToggle').on('click', function () {
+          const cardBody = $(this).next('.card-body');
+          const toggleText = $(this).find('.toggleText');
+
+          cardBody.slideToggle('slow', function () {
+              if (cardBody.is(':visible')) {
+                  toggleText.html("Свернуть &#9650;");
+              } else {
+                  toggleText.html("Развернуть &#9660;");
+              }
+          });
+      });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll('.toggle-details').forEach(function (toggle) {
+          toggle.addEventListener('click', function () {
+              var siteDetails = this.closest('.box').querySelector('.site-details');
+              if (siteDetails) {
+                  siteDetails.classList.toggle('active');
+              }
+          });
+      });
+  });
+</script>
+
+<script>
+  const body = document.querySelector("body"),
+      modeToggle = body.querySelector(".mode-toggle");
+  sidebar = body.querySelector("nav");
+  sidebarToggle = body.querySelector(".sidebar-toggle");
+  let getMode = localStorage.getItem("mode");
+  if (getMode && getMode === "dark") {
+      body.classList.toggle("dark");
+  }
+  let getStatus = localStorage.getItem("status");
+  if (getStatus && getStatus === "close") {
+      sidebar.classList.toggle("close");
+  }
+  modeToggle.addEventListener("click", () => {
+      body.classList.toggle("dark");
+      if (body.classList.contains("dark")) {
+          localStorage.setItem("mode", "dark");
+      } else {
+          localStorage.setItem("mode", "light");
+      }
+  });
+  sidebarToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("close");
+      if (sidebar.classList.contains("close")) {
+          localStorage.setItem("status", "close");
+      } else {
+          localStorage.setItem("status", "open");
+      }
+  })
+
+
+</script>

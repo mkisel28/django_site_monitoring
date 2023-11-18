@@ -1,0 +1,67 @@
+<!-- Модальное окно Bootstrap для уведомлений -->
+<style>
+  .checkmark, .crossmark {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: relative;
+    margin-bottom: 15px;
+  }
+  
+  .checkmark::after, .crossmark::after, .crossmark::before {
+    content: '';
+    position: absolute;
+    background-color: green; /* цвет галочки */
+  }
+  
+  .checkmark::after {
+    left: 16px;
+    top: 10px;
+    width: 15px;
+    height: 30px;
+    border: solid white;
+    border-width: 0 4px 4px 0;
+    transform: rotate(45deg);
+  }
+  
+  .crossmark {
+    background-color: red; /* цвет крестика */
+  }
+  
+  .crossmark::before, .crossmark::after {
+    content: '';
+    position: absolute;
+    height: 50px;
+    width: 4px;
+    background-color: white;
+  }
+  
+  .crossmark::before {
+    left: 23px;
+    top: 0;
+    transform: rotate(45deg);
+  }
+  
+  .crossmark::after {
+    left: 23px;
+    top: 0;
+    transform: rotate(-45deg);
+  }
+</style>
+
+<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Уведомление</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Сообщение будет сюда -->
+      </div>
+    </div>
+  </div>
+</div>

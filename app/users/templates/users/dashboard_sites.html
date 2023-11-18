@@ -1,0 +1,26 @@
+{% extends "users/static/base.html"  %}
+
+{% block content %}
+
+
+<section class="dashboard">
+  <div class="dash-content">
+
+
+    <div class="my-sites">
+      <div class="title">
+          <i class="uil uil-sitemap"></i>
+          <span class="text">Добавить сайт</span>
+      </div>
+     {% include "users/module/site_form.html"  %}
+    </div>
+
+
+
+  </div>
+</section>
+
+
+
+{% endblock content %}
+```

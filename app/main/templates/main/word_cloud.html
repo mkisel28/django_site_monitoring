@@ -1,33 +1,21 @@
 {% load static %}
 
 <div class="word-cloud" id="cloud-conteiner" style="display: block;">
-  <span>Облако тегов</span>
-  <ul>
-    {% for word in words %}
-    <li>
-        <a href="#" class="word {{ word.frequency }}" data-word-id="{{ word.id }}">
-            {{ word.text }}
-        </a>
-    
-    <li>
-    {% endfor %}
+    <span>Облако тегов</span>
+    <ul>
+        {% for word in words %}
+        <li>
+            <a href="#" class="word {{ word.frequency }}" data-word-id="{{ word.id }}">
+                {{ word.text }}
+            </a>
+
+        <li>
+            {% endfor %}
     </ul>
 </div>
 
-<div class="website-block articles-list" style="display: none;">
+<div class="website-block articles-list tags-list" style="display: none;">
     <ul class="websites"></ul>
 </div>
 
 <link rel="stylesheet" type="text/css" href="{% static 'css/word_cloud.css' %}">
-
-
-
-
-
-
-
-
-
-
-
-

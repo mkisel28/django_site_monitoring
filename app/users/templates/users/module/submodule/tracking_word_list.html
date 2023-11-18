@@ -1,0 +1,77 @@
+{% csrf_token %}
+
+<ul id="wordList" class="list-group">
+  {% for item in words_with_counts %}
+  <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ item.word.id }}">
+    {{ item.word.keyword }}
+    <span class="badge badge-primary badge-pill">{{ item.count }}</span>
+    <button class="btn btn-danger btn-sm deleteWord">Удалить</button>
+  </li>
+  {% empty %}
+  <li class="list-group-item">Нет отслеживаемых слов.</li>
+  {% endfor %}
+</ul>
+
+<!-- Пагинация -->
+<div aria-label="Page navigation">
+  <ul class="pagination">
+    {% for num in words_with_counts.paginator.page_range %}
+    {% if words_with_counts.number == num %}
+    <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+    {% else %}
+    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+</div>
+
+
+<script >
+  var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+$("#addWordForm").submit(function (e) {
+  e.preventDefault();
+  Swal.fire("Ожидайте, сейчас добавим");
+
+  $.post("{% url 'users:add_word_api' %}", $(this).serialize()).done(function (data) {
+    if (data.status == 'success') {
+      Swal.fire({
+        title: 'Отлично',
+        text: 'Слово добавленно',
+        icon: 'success',
+        confirmButtonText: 'Закрыть'
+      })
+      $("#wordList").append('<li class="list-group-item d-flex justify-content-between align-items-center" data-id="' +
+        data.word_id + '">' + data.word_text +
+        '<span class="badge badge-primary badge-pill">' + data.count + '</span>' +
+        ' <button class="btn btn-danger btn-sm deleteWord">Удалить</button></li>');
+    } else {
+      var errorMessage = data.errors ? JSON.stringify(data.errors) : 'Неизвестная ошибка';
+      Swal.fire({
+        title: 'Ошибка',
+        text: errorMessage,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  });
+});
+
+$("#wordList").on("click", ".deleteWord", function () {
+  var li = $(this).closest('li');
+  var wordId = li.attr('data-id');
+  $.ajax({
+    url: "{% url 'users:delete_word_api' '0' %}".replace('0', wordId),
+    type: 'DELETE',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    },
+    success: function (data) {
+      if (data.status == 'success') {
+        li.remove();
+      } else {
+        alert(data.message);
+      }
+    }
+  });
+}); 
+</script>

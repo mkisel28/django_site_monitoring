@@ -1,53 +1,53 @@
 <div class="filters" id="filter-conteiner-cloud" style="display: none;">
   <div class="filter-section">
-      <select id="dateFilter">
-          <option value="all">За все время</option>
-          <option value="today">За сегодня</option>
-          <option value="week">За последнюю неделю</option>
-          <option value="month">За последний месяц</option>
-      </select>
+    <select id="dateFilter">
+      <option value="all">За все время</option>
+      <option value="today">За сегодня</option>
+      <option value="week">За последнюю неделю</option>
+      <option value="month">За последний месяц</option>
+    </select>
   </div>
   <div class="filter-section">
 
     <select id="countFilter">
-        <option value="10">Отображать последние 10</option>
-        <option value="25">Отображать последние 25</option>
-        <option value="50">Отображать последние 50</option>
-        <option value="">Отображать все</option>
+      <option value="10">Отображать последние 10</option>
+      <option value="25">Отображать последние 25</option>
+      <option value="50">Отображать последние 50</option>
+      <option value="">Отображать все</option>
     </select>
-</div>
+  </div>
   <div class="filter-section">
     <select id="countriesFilter" multiple="multiple">
-      <optgroup label="Избранные страны:" >
+      <optgroup label="Избранные страны:">
         <option value="{% for site in favorite_countries %}{{ site.id  }},{% endfor %}">Все избранные страны</option>
 
         {% for site in favorite_countries %}
         <option value="{{ site.id }}">{{ site.name }}</option>
         {% endfor %}
-        </optgroup>
-        <optgroup label="Остальные страны">
+      </optgroup>
+      <optgroup label="Остальные страны">
         {% for site in other_countries %}
         <option value="{{ site.id }}">{{ site.name }}</option>
         {% endfor %}
-        </optgroup>
+      </optgroup>
     </select>
-</div>
+  </div>
 
-<div class="filter-section">
+  <div class="filter-section">
     <select id="websitesFilter" multiple="multiple">
-      <optgroup label="Избранные сайты:" >
+      <optgroup label="Избранные сайты:">
         <option value="{% for site in favorite_sites %}{{ site.id  }},{% endfor %}">Все избранные сайты</option>
 
         {% for site in favorite_sites %}
         <option value="{{ site.id }}">{{ site.name }}</option>
         {% endfor %}
-        </optgroup>
-        <optgroup label="Остальные сайты">
+      </optgroup>
+      <optgroup label="Остальные сайты">
         {% for site in other_sites %}
         <option value="{{ site.id }}">{{ site.name }}</option>
         {% endfor %}
-        </optgroup>
+      </optgroup>
     </select>
-</div>
-<button id="applyFilters">Применить фильтры</button>
+  </div>
+  <button id="applyFilters">Применить фильтры</button>
 </div>

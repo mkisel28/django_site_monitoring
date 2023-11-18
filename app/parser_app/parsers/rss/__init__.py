@@ -7,33 +7,36 @@ logger = logging.getLogger("parsers")
 
 def append_article(articles, title, url, lastmod):
     try:
+        if not title or not url:
+            logger.warning(f"Title or URL is missing for an article. Title {title}, URL: {url[:20]}")
+            return
         articles.append({
             "title": clean_html_entities(title),
             "article_url": url,
             "lastmod": lastmod
         })
-    except AttributeError:
-        pass
+    except AttributeError as e:
+        logger.warning(f"Attribute error in append_article: {e}")
     except Exception as e:
         logger.error(f"Error appending article: {e}")
 
         
 def feed_parse(sitemap_url):
-    agent = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 YaBrowser/23.7.5.734 Yowser/2.5 Safari/537.36"}
-    feed = feedparser.parse(sitemap_url, agent=str(agent['User-Agent']))
+    try:
+        agent = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 YaBrowser/23.7.5.734 Yowser/2.5 Safari/537.36"}
+        feed = feedparser.parse(sitemap_url, agent=str(agent['User-Agent']))
 
-    if not feed.entries:
-        feed = feedparser.parse(sitemap_url)
-        
-    articles = []
-    for entry in feed.entries:
-        try:
+        if not feed.entries:
+            feed = feedparser.parse(sitemap_url)
+            
+        articles = []
+        for entry in feed.entries:
             append_article(articles, entry.title, entry.link, entry.published)
-        except AttributeError as e:
-            pass
-        except Exception as e:
-            raise(e)
-    return articles[:100] if articles else None
+
+        return articles[:100] if articles else None
+    except Exception as e:
+        logger.error(f"Error in feed_parse: {e}")
+        return None
 
 def parse_atom(root):
     namespaces = {'atom': 'http://www.w3.org/2005/Atom'}
@@ -79,6 +82,6 @@ def parse(sitemap_url, response):
     except ET.ParseError:
         return feed_parse(sitemap_url)
     except Exception as e:
-        logger.warning(f"Error parsing sitemap: {e}")
+        logger.warning(f"RSS: Не удалось спарсить сайт {sitemap_url}: {e}")
         return None
 

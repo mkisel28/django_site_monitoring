@@ -1,0 +1,190 @@
+<style>
+    .website-block {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    aside {
+        width: 300px;
+        min-width: 250px;
+        background-color: #f4f4f4;
+        padding: 20px;
+        box-sizing: border-box;
+        border-right: 2px solid #ddd;
+        border-radius: 5px;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    ul {
+        width: 100%;
+    }
+
+    .menu-toggle-aside {
+        display: none;
+    }
+
+    .menu-close-aside {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        aside {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            height: 100%;
+            transform: translateX(-100%);
+            /* Скрыть боковую панель за левой стороной экрана */
+        }
+
+        .menu-toggle-aside {
+            display: block;
+            cursor: pointer;
+        }
+
+        .website-block {
+            display: block;
+        }
+
+        .menu-toggle-aside {
+            display: block;
+            cursor: pointer;
+        }
+
+        .menu-close-aside {
+            display: block;
+            cursor: pointer;
+        }
+    }
+
+    /* Стиль для активной боковой панели */
+    .aside-active {
+        transform: translateX(0);
+    }
+</style>
+<aside class="sidebar">
+    <button class="menu-close-aside" aria-label="Close navigation menu">✕</button>
+    <div class="checkbox-wrapper-34">
+        <input class='tgl tgl-ios' id='showOnlyFavorites' type='checkbox'>
+        <label class='tgl-btn' for='showOnlyFavorites'></label>
+        <span>Избранные сайты</span>
+    </div>
+
+
+
+    <!-- Select для вкладок -->
+    <div class="select-wrapper">
+        <select id="tabsSelect" class="select2">
+            <option value=""> </option>
+            {% for tab in tabs  %}
+            <option value="{{ tab.id }}">{{ tab }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Multi Select2 для стран -->
+    <div class="select-wrapper">
+        <select id="countriesSelect" class="select2" multiple="multiple">
+            <option value="all">Все</option>
+            {% for country in countries  %}
+            <option value="{{ country.id }}">{{ country.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Multi Select2 для сайтов -->
+    <div class="select-wrapper">
+        <select id="websitesSelect" class="select2" multiple="multiple">
+            <optgroup label="Избранные сайты:">
+                <option value="{% for site in favorite_sites %}{{ site.id  }},{% endfor %}">Все избранные сайты</option>
+
+                {% for site in favorite_sites %}
+                <option value="{{ site.id }}">{{ site.name }}</option>
+                {% endfor %}
+            </optgroup>
+            <optgroup label="Остальные сайты">
+                {% for site in other_sites %}
+                <option value="{{ site.id }}">{{ site.name }}</option>
+                {% endfor %}
+            </optgroup>
+        </select>
+    </div>
+    <div class="select-wrapper">
+        <select id="trackwordSelect" class="select2" multiple="multiple">
+            <option value="all">Все</option>
+            {% for trackword in tracked_words  %}
+            <option value="{{ trackword.id }}">{{ trackword.keyword }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+
+    <!-- Wrapper для выбора даты -->
+    <div class="date-picker-wrapper">
+        <div class="date-picker">
+            <label for="startDate">Дата начала:</label>
+            <input type="date" id="startDate">
+        </div>
+        <div class="date-picker">
+            <label for="endDate">Дата конца:</label>
+            <input type="date" id="endDate">
+        </div>
+    </div>
+</aside>
+
+
+<script>
+    $(document).ready(function () {
+        $('#tabsSelect').select2({
+            placeholder: "Выберите вкладку",
+            width: '100%',
+            allowClear: true
+
+        });
+        $('#countriesSelect').select2({
+            placeholder: "Выберите страны",
+            width: '100%',
+            allowClear: true
+
+        });
+        $('#websitesSelect').select2({
+            placeholder: "Выберите сайты",
+            width: '100%',
+            allowClear: true
+
+        });
+        $('#trackwordSelect').select2({
+            placeholder: "Выберите ключевые слова",
+            width: '100%',
+            allowClear: true
+
+        });
+    });
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var menuToggle = document.querySelector('.menu-toggle-aside');
+        var menuClose = document.querySelector('.menu-close-aside');
+        var sidebar = document.querySelector('aside');
+
+        // Открытие боковой панели
+        menuToggle.addEventListener('click', function () {
+            sidebar.classList.add('aside-active');
+        });
+
+        // Закрытие боковой панели с кнопки внутри панели
+        menuClose.addEventListener('click', function () {
+            sidebar.classList.remove('aside-active');
+        });
+
+        // Закрытие боковой панели при клике вне её
+        document.addEventListener('click', function (event) {
+            if (!sidebar.contains(event.target) && !event.target.matches('.menu-toggle-aside')) {
+                sidebar.classList.remove('aside-active');
+            }
+        });
+    });
+</script>

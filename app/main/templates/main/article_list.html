@@ -4,19 +4,19 @@
 <h1>Articles</h1>
 <div class="website-block">
   <ul>
-  {% for article in articles %}
-      <li>
-        <div class="website-url"> 
+    {% for article in articles %}
+    <li>
+      <div class="website-url">
 
-            <a href="{{ article.url }}">{{ article.title }}</a>
+        <a href="{{ article.url }}">{{ article.title }}</a>
 
-          <div class="article-date">
-            <span class="publish-date"> {{ article.published_at }} </span>
-          </div>
+        <div class="article-date">
+          <span class="publish-date"> {{ article.published_at }} </span>
         </div>
-        
-      </li>
-  {% endfor %}
+      </div>
+
+    </li>
+    {% endfor %}
   </ul>
 </div>
 
@@ -27,4 +27,4 @@
 
 
 
-    {% endblock %}
+{% endblock %}

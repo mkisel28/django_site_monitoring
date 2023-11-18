@@ -19,14 +19,34 @@ class WebsiteAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'website',
+    list_display = ['id', 'title', 'website', "category", "eng_title",
                     'published_at', 'url', 'display_country']
     search_fields = ['title', 'title_translate', 'website__name']
     list_filter = ['published_at', 'website', 'website__country']
+    
+    actions = ['clear_eng_title', 'clear_category', 'clear_all_categories', 'clear_all_eng_titles']
+    
+    def clear_eng_title(self, request, queryset):
+        queryset.update(eng_title=None)
+    clear_eng_title.short_description = "Очистить английские названия"
+
+    def clear_category(self, request, queryset):
+        queryset.update(category=None)
+    clear_category.short_description = "Очистить категории"
 
     def display_country(self, obj):
         return obj.website.country.name if obj.website.country else '-'
     display_country.short_description = 'Страна'
+    
+    def clear_all_categories(self, request, queryset):
+        Article.objects.all().update(category=None)
+    clear_all_categories.short_description = "Очистить категории всех статей"
+    
+    def clear_all_eng_titles(self, request, queryset):
+        Article.objects.all().update(eng_title=None)
+    clear_all_eng_titles.short_description = "Очистить английские названия всех статей"
+    
+    
 
 
 

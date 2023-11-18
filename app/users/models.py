@@ -2,7 +2,7 @@ from django.db import models
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
-from main.models import Country, TrackedWord, Website
+from main.models import Country, TrackedWord, Website, Article
 
 # Create your models here.
 class Tab(models.Model):
@@ -77,3 +77,49 @@ class TabTrackedWord(models.Model):
     def __str__(self):
         return self.tracked_word.keyword
 
+
+class Task(models.Model):
+    class TaskStatus(models.TextChoices):
+        PENDING = 'pending', 'Отложено'
+        IN_PROGRESS = 'in_progress', 'В Процессе'
+        COMPLETED = 'completed', 'Отработано'
+
+    class Priority(models.IntegerChoices):
+        LOW = 1, 'Низкий'
+        MEDIUM = 2, 'Средний'
+        HIGH = 3, 'Высокий'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks', verbose_name='Пользователь')
+    article = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Статья')
+    status = models.CharField(
+        max_length=20, 
+        choices=TaskStatus.choices, 
+        default=TaskStatus.PENDING, 
+        verbose_name='Статус'
+    )
+    priority = models.IntegerField(
+        choices=Priority.choices, 
+        default=Priority.MEDIUM, 
+        verbose_name='Приоритет')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    class Meta:
+        verbose_name = 'Задача'
+        verbose_name_plural = 'Задачи'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.article.title} - {self.get_status_display()} - {self.get_priority_display()}"
+
+class Comment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments', verbose_name='Задача')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    text = models.TextField(verbose_name='Текст комментария')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.task} - {self.created_at}"

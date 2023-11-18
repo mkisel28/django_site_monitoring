@@ -20,7 +20,9 @@ class TrackedWordForm(forms.ModelForm):
         model = TrackedWord
         fields = ['keyword']
 
-
+    def __init__(self, *args, **kwargs):
+        super(TrackedWordForm, self).__init__(*args, **kwargs)
+        self.fields['keyword'].widget.attrs['placeholder'] = 'Введите слово'
 
 
 # class WebsiteURLForm(forms.Form):

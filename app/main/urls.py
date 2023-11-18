@@ -35,6 +35,8 @@ urlpatterns = [
      # path('api/articles_for_word/<int:word_id>/', views.articles_for_word, name='articles_for_word'),
      path('api/articles_for_related_data/<str:data_type>/<int:data_id>/', views.articles_for_related_data, name='articles_for_related_data'),
 
+
+     path('api/get_tab_data/' , views.get_tab_data_api, name='get_data_tab'),
      path('api/test/', views.test, name='api_country_articles'),
 
 

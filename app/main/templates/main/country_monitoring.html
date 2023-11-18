@@ -5,71 +5,75 @@
     {% include "main/word_cloud.html" %}
     {% include "main/tracked_word_cloud.html" %}
 </div>
-    <h1>Страны</h1>
-    <div class="favorites-container">
-      <h2>Избранные страны</h2>
-      <a href="{% url 'main:all_favourite_country' %}" class="button-link">Мониторинг избранных стран</a>
+<h1>Страны</h1>
+<div class="favorites-container">
+    <h2>Избранные страны</h2>
+    <a href="{% url 'main:all_favourite_country' %}" class="button-link">Мониторинг избранных стран</a>
+</div>
+
+<div class="websites">
+
+    <!-- Избранные страны -->
+
+    {% for country in favorite_countries %}
+    <div class="website-block " data-url="{% url 'main:country_articles' country.code %}">
+
+        <a href="#" class="toggle-country-favorite"
+            data-action="{% url 'main:remove_favorite_country' country.code %}"><i class="fas fa-star"></i></a>
+        <h2>{{ country.name }}</h2>
     </div>
-  
-    <div class="websites">
+    {% endfor %}
+</div>
+<!-- Остальные страны -->
+<h2>Остальные страны</h2>
+<div class="websites">
+    {% for country in other_countries %}
+    <div class="website-block" data-url='{% url 'main:country_articles' country.code %}'>
 
-        <!-- Избранные страны -->
-        
-        {% for country in favorite_countries %}
-            <div class="website-block " data-url="{% url 'main:country_articles' country.code %}">
-
-              <a href="#" class="toggle-country-favorite" data-action="{% url 'main:remove_favorite_country' country.code %}"><i class="fas fa-star"></i></a>
-              <h2>{{ country.name }}</h2>
-          </div>
-      {% endfor %}
+        <a href="#" class="toggle-country-favorite" data-action="{% url 'main:add_favorite_country' country.code %}"><i
+                class="far fa-star"></i></a>
+        <h2>{{ country.name }}</h2>
     </div>
-        <!-- Остальные страны -->
-        <h2>Остальные страны</h2>
-        <div class="websites">
-        {% for country in other_countries %}
-            <div class="website-block" data-url='{% url 'main:country_articles' country.code %}'>
+    {% endfor %}
 
-                <a href="#" class="toggle-country-favorite" data-action="{% url 'main:add_favorite_country' country.code %}"><i class="far fa-star"></i></a>
-                <h2>{{ country.name }}</h2>
-            </div>
-        {% endfor %}
-        
+</div>
+
+
+
+<h1>Сайты</h1>
+<div class="favorites-container">
+    <h2>Избранные сайты </h2>
+    <a href="{% url 'main:all_favourite_country' %}" class="button-link">Мониторинг избранных сайтов</a>
+</div>
+
+<div class="websites">
+
+    <!-- Избранные сайты -->
+
+    {% for sites in favorite_sites %}
+    <div class="website-block " data-url="{% url 'main:website_articles' sites.id %}">
+        <div class="country">{{ sites.country }}</div>
+        <a href="#" class="toggle-country-favorite" data-action="{% url 'main:remove_favorite' sites.id %}"><i
+                class="fas fa-star"></i></a>
+        <h2>{{ sites.name }}</h2>
     </div>
-
-
-
-    <h1>Сайты</h1>
-    <div class="favorites-container">
-      <h2>Избранные сайты </h2>
-      <a href="{% url 'main:all_favourite_country' %}" class="button-link">Мониторинг избранных сайтов</a>
-  </div>
-  
-    <div class="websites">
-
-        <!-- Избранные сайты -->
-        
-        {% for sites in favorite_sites %}
-            <div class="website-block " data-url="{% url 'main:website_articles' sites.id %}">
-              <div class="country">{{ sites.country }}</div> 
-              <a href="#" class="toggle-country-favorite" data-action="{% url 'main:remove_favorite' sites.id %}"><i class="fas fa-star"></i></a>
-              <h2>{{ sites.name }}</h2>
-          </div>
-      {% endfor %}
+    {% endfor %}
+</div>
+<!-- Остальные страны -->
+<h2>Остальные сайты</h2>
+<div class="websites">
+    {% for sites in other_sites %}
+    <div class="website-block" data-url='{% url 'main:website_articles' sites.id %}'>
+        <div class="country">{{ sites.country }}</div>
+        <a href="#" class="toggle-country-favorite" data-action="{% url 'main:add_favorite' sites.id %}"><i
+                class="far fa-star"></i></a>
+        <h2>{{ sites.name }}</h2>
     </div>
-        <!-- Остальные страны -->
-        <h2>Остальные сайты</h2>
-        <div class="websites">
-        {% for sites in other_sites %}
-            <div class="website-block" data-url='{% url 'main:website_articles' sites.id %}'>
-                <div class="country">{{ sites.country }}</div> 
-                <a href="#" class="toggle-country-favorite" data-action="{% url 'main:add_favorite' sites.id %}"><i class="far fa-star"></i></a>
-                <h2>{{ sites.name }}</h2>
-            </div>
-        {% endfor %}
-        
-    </div>
+    {% endfor %}
 
-    <script src="{% static 'js/country_favorite_handler.js' %}"  ></script>
-    <script src="{% static 'js/favorite_handler.js' %}"  ></script>
-    <script src="{% static 'js/click.js' %}"  ></script>
+</div>
+
+<script src="{% static 'js/country_favorite_handler.js' %}"></script>
+<script src="{% static 'js/favorite_handler.js' %}"></script>
+<script src="{% static 'js/click.js' %}"></script>
 {% endblock %}

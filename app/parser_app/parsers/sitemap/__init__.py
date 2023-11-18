@@ -1,12 +1,17 @@
 from ..utils import   clean_html_entities
 from bs4 import BeautifulSoup
+import logging
+
+
+logger = logging.getLogger("parsers")
+
 
 def parse(url, response):
     try:
       soup =  BeautifulSoup(response, 'xml')
     except Exception as e:
-        print(f"{url} - {e}")
-        return None
+      logger.warning(f"Sitemap: Ошибка парсинга: {url} | {e}")
+      return None
     articles = []
     
     for url in soup.find_all('url'):

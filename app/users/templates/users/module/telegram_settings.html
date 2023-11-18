@@ -1,37 +1,33 @@
 <div class="card mt-4">
-  <div class="card-header cardToggle">
-      <h3>Настройки оповещений в Telegram</h3>
-      <span class="float-right toggleText" onclick="toggleCardBody()">Свернуть &#9650;</span>
-  </div>
-  <div class="card-body" style="display: block;">
-      <form id="telegramNotificationForm" method="post" action="{% url 'users:toggle_telegram_notifications' %}">
-          {% csrf_token %}
-          <div class="form-group">
-              <label for="telegram_chat_id">Ваш Telegram Chat ID или Username:</label>
-              <input type="text" 
-                class="form-control" 
-                name="telegram_chat_id" 
-                id="telegram_chat_id" 
-                placeholder="Введите ваш Chat ID или Username" 
-                title="Уникальный идентификатор чата или ваш username в Telegram" 
-                value="{{ request.user.userprofile.telegram_chat_id }}">
-              <small class="form-text text-muted">
-                Не знаете свой ID? <a href="https://t.me/username_to_id_bot" target="_blank">Получите его здесь</a>
-              </small>
-          </div>
-          <div class="form-check">
-              <input 
-                type="checkbox" 
-                class="form-check-input" 
-                name="telegram_notifications" 
-                id="telegram_notifications" 
-                {% if request.user.userprofile.telegram_notifications %}checked{% endif %}>
-              <label class="form-check-label" for="telegram_notifications">Хочу получать уведомления в Telegram</label>
-              <small class="form-text text-muted">
-                Для активации уведомлений <a href="https://t.me/SpamSticker11111_bot" target="_blank">запустите этого Бота</a>.
-              </small>
-          </div>
-          <input type="submit" class="btn btn-primary mt-3" value="Сохранить изменения">
-      </form>
-  </div>
+    <div class="card-header cardToggle">
+        <h3>Настройки оповещений в Telegram</h3>
+        <span class="float-right toggleText" onclick="toggleCardBody()">Свернуть &#9650;</span>
+    </div>
+    <div class="card-body" style="display: block;">
+        <form id="telegramNotificationForm" method="post" action="{% url 'users:toggle_telegram_notifications' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="telegram_chat_id">Ваш Telegram Chat ID или Username:</label>
+                <input type="text" class="form-control" name="telegram_chat_id" id="telegram_chat_id"
+                    placeholder="Введите ваш Chat ID или Username"
+                    title="Уникальный идентификатор чата или ваш username в Telegram"
+                    value="{{ request.user.userprofile.telegram_chat_id }}">
+                <small class="form-text text-muted">
+                    Не знаете свой ID? <a href="https://t.me/username_to_id_bot" target="_blank">Получите его здесь</a>
+                </small>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="telegram_notifications"
+                    id="telegram_notifications"
+                    {% if request.user.userprofile.telegram_notifications %}checked{% endif %}>
+                <label class="form-check-label" for="telegram_notifications">Хочу получать уведомления в
+                    Telegram</label>
+                <small class="form-text text-muted">
+                    Для активации уведомлений <a href="https://t.me/SpamSticker11111_bot" target="_blank">запустите
+                        этого Бота</a>.
+                </small>
+            </div>
+            <input type="submit" class="btn btn-primary mt-3" value="Сохранить изменения">
+        </form>
+    </div>
 </div>

@@ -1,4 +1,4 @@
-from datetime import  timedelta
+from datetime import timedelta
 from collections import Counter
 import logging
 
@@ -14,6 +14,7 @@ from parsers import parse
 
 logger = logging.getLogger("database")
 
+
 def save_to_db(website_id, data):
     try:
         website = Website.objects.get(pk=website_id)
@@ -24,12 +25,11 @@ def save_to_db(website_id, data):
     except DatabaseError:
         logger.exception(f"Database error getting website with id {website_id}")
         return
-    
 
     for entry in data:
-        title = entry.get("title", None) 
-        url = entry.get("article_url", None) 
-        published_at = entry.get("lastmod", None) 
+        title = entry.get("title", None)
+        url = entry.get("article_url", None)
+        published_at = entry.get("lastmod", None)
 
         if any(url.startswith(ignored_url) for ignored_url in ignored_urls):
             continue
@@ -41,8 +41,6 @@ def save_to_db(website_id, data):
             except Exception as e:
                 logger.error(f"Error saving to database: {e}")
                 logger.debug(f"Details: {website}, {title}, {url}, {published_at}")
-
-
 
 
 # def main():
@@ -61,7 +59,7 @@ def save_to_db(website_id, data):
 #                     else: logger.warning(f"Пустой парсинг controller.py __main__: {website}" )
 #         logger.info("COMPLATED PARS ALL SITE")
 #         time.sleep(60)
-              
+
 
 # def test(id, base_url, sitemap_url):
 
@@ -81,28 +79,22 @@ def worker(website):
         data = parse(base_url, sitemap_url)
         if data:
             save_to_db(website_id, data)
-        else: 
-            logger.warning(f"[{thread_n}] Пустой парсинг controller.py: {website}" )
+        else:
+            logger.warning(f"[{thread_n}] Пустой парсинг controller.py: {website}")
 
-            
 
 def main():
     websites = Website.objects.all()
-    
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         executor.map(worker, websites)
 
     logger.info("COMPLETED PARSING ALL SITES")
 
 
-
-
-
-
-
 #   фильтрует статьи за последний час
 def top_words():
-    config = Configuration.objects.first() 
+    config = Configuration.objects.first()
     HOURS = config.hours
     TOP_COUNT = config.top_words_count
 
@@ -116,16 +108,15 @@ def top_words():
 
     word_counts = Counter(all_words)
     top_10_words = word_counts.most_common(TOP_COUNT)
-    #Удаление старых тегов (30 дней)
+    # Удаление старых тегов (30 дней)
     cutoff_time = timezone.now() - timedelta(days=30)
     Word.articles.through.objects.filter(word__timestamp__lt=cutoff_time).delete()
     Word.objects.filter(timestamp__lt=cutoff_time).delete()
 
-
     # Сохранение слов и их частоты в базу данных
     for word_text, count in top_10_words:
         word = Word(text=word_text, frequency=count)
-        word.save() 
+        word.save()
         # Привязка слова к статьям, в которых оно встречается
         for article in recent_articles:
             if article.normalized_title:
@@ -133,4 +124,3 @@ def top_words():
                     word.articles.add(article)
 
         word.save()
-

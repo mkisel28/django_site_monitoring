@@ -23,7 +23,7 @@ def parse(base_url, sitemap_url):
     try:
         response = get_resource(sitemap_url)
     except Exception as e:
-        logger.error(f"Error parsing sitemapping: {sitemap_url} | {e}")
+        logger.error(f"Ошибка запроса к сайту: {sitemap_url} | {e}")
         return None
     
     parsed_data = rss.parse(sitemap_url, response)

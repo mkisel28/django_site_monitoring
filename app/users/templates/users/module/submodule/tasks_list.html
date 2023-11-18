@@ -1,0 +1,197 @@
+{% csrf_token %}
+{% for task in tasks %}
+<li class="list-group-item task-item" data-id="{{ task.article.id }}" data-status="{{ task.status }}" data-priority="{{ task.priority }}">
+  <div class="d-flex justify-content-between align-items-center">
+    <a href={{ task.article.url}}>{% if task.article.title_translate %} {{ task.article.title_translate }} {% else %} {{ task.article.title  }}{% endif  %}</a>
+    <div class="d-flex align-items-end"> 
+        <div class="status-container">
+            <span class="badge" style="background-color: {% if task.status == 'pending' %}#ffffcc{% elif task.status == 'in_progress' %}#ccffcc{% else %}#ffcccc{% endif %};">
+              {{ task.get_status_display }}
+            </span>
+            <select class="form-control status-select" >
+              {% for status in task.TaskStatus.choices %}
+              <option value="{{ status.0 }}" {% if status.0 == task.status %} selected {% endif %}>
+                {{ status.1 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="priority-container">
+            <span class="badge" style="background-color: {% if task.priority == 1 %}green{% elif task.priority == 2 %}yellow{% else %}red{% endif %};">
+              {{ task.get_priority_display }}
+            </span>
+            <select class="form-control priority-select">
+              {% for priority in task.Priority.choices %}
+              <option value="{{ priority.0 }}" {% if priority.0 == task.priority %} selected {% endif %}>
+                {{ priority.1 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <span class="created-at p-2">{{ task.created_at|date:"d.m.y H:i" }}</span>
+    </div>
+
+    
+  </div>
+</li>
+{% empty %}
+<li class="list-group-item">У вас нет задач. Самое время что-нибудь <a href="/live">найти.</a></li>
+{% endfor %}
+
+
+<script>
+
+function updateTask(taskId, attribute, newValue) {
+  var formData = new FormData();
+  var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+  formData.append('article_id', taskId);
+  formData.append(attribute, newValue);
+
+  $.ajax({
+      url: '/api/tasks/update/',
+      method: 'POST',
+      data: {
+          'article_id': taskId,
+          [attribute]: newValue,
+          'csrfmiddlewaretoken': csrftoken
+      },
+      success: function(data) {
+          if(data.status === 'success') {
+              // Обновляем данные задачи на странице
+              let taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
+              taskItem.setAttribute(`data-${attribute}`, newValue);
+              
+              updateTaskUI(taskItem, attribute, newValue);
+              // Пересортировка и плавное перемещение задач
+              sortTasks();
+
+              console.log(data.message);
+          } else {
+              console.error(data.message);
+          }
+      },
+      error: function(error) {
+          console.error('Ошибка:', error);
+      }
+  });
+}
+   
+sortTasks();
+    document.addEventListener('DOMContentLoaded', function() {
+      sortTasks();
+    });
+  
+  document.querySelectorAll('.status-select, .priority-select').forEach(select => {
+      select.addEventListener('change', function() {
+          var taskId = this.closest('.task-item').dataset.id;
+          var attribute = this.classList.contains('status-select') ? 'status' : 'priority';
+          var newValue = this.value;
+          updateTask(taskId, attribute, newValue);
+      });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+      sortTasks();
+    });
+  
+    function sortTasks() {
+      let tasks = Array.from(document.querySelectorAll('.task-item'));
+      tasks.sort((a, b) => {
+        let statusA = a.getAttribute('data-status');
+        let statusB = b.getAttribute('data-status');
+  
+        if (statusA === statusB) {
+          if (statusA === 'completed') {
+            return new Date(a.querySelector('.created-at').innerText) - new Date(b.querySelector('.created-at').innerText);
+          } else {
+            return parseInt(b.getAttribute('data-priority')) - parseInt(a.getAttribute('data-priority'));
+          }
+        } else {
+          return getStatusOrder(statusA) - getStatusOrder(statusB);
+        }
+      });
+  
+      let taskList = document.getElementById('taskList');
+      tasks.forEach(task => taskList.appendChild(task));
+    
+
+    }
+  
+    function getStatusOrder(status) {
+      switch (status) {
+        case 'in_progress': return 1;
+        case 'pending': return 2;
+        case 'completed': return 3;
+        default: return 4;
+      }
+    }
+    function updateTaskUI(taskItem, attribute, newValue) {
+      if (attribute === 'status') {
+        let statusBadge = taskItem.querySelector('.status-container .badge');
+        updateBadge(statusBadge, getStatusText(newValue), getStatusColor(newValue));
+      } else if (attribute === 'priority') {
+        let priorityBadge = taskItem.querySelector('.priority-container .badge');
+        updateBadge(priorityBadge, getPriorityText(newValue), getPriorityColor(newValue));
+      }
+    
+      // Добавляем класс подсветки
+      taskItem.classList.add('highlight');
+    
+      // Удаляем класс подсветки после завершения анимации
+      setTimeout(() => {
+        taskItem.classList.remove('highlight');
+      }, 1500); // Время соответствует длительности анимации
+    }
+
+    function updateBadge(badge, newText, newColor) {
+      // Плавное исчезновение текста и цвета
+      badge.style.opacity = '0';
+      badge.style.transition = 'opacity 0.25s ease';
+    
+      setTimeout(() => {
+        // Обновление текста и цвета
+        badge.textContent = newText;
+        badge.style.backgroundColor = newColor;
+    
+        // Плавное появление обновленного текста и цвета
+        badge.style.opacity = '1';
+      }, 250); // Задержка соответствует продолжительности исчезновения
+    }
+    
+    function getStatusText(status) {
+      switch (status) {
+        case 'in_progress': return 'В процессе';
+        case 'pending': return 'Отложено';
+        case 'completed': return 'Отработанно';
+        default: return 'Unknown';
+      }
+    }
+    
+    function getStatusColor(status) {
+      switch (status) {
+        case 'in_progress': return '#ccffcc';
+        case 'pending': return '#ffffcc';
+        case 'completed': return '#ffcccc';
+        default: return 'black';
+      }
+    }
+    
+    function getPriorityText(priority) {
+      switch (priority) {
+        case '3': return 'Высокий';
+        case '2': return 'Средний';
+        case '1': return 'Низкий';
+        default: return 'Unknown';
+      }
+    }
+    
+    function getPriorityColor(priority) {
+      switch (priority) {
+        case '1': return 'green';
+        case '2': return 'yellow';
+        case '3': return 'red';
+        default: return 'black';
+      }
+    }
+  </script>

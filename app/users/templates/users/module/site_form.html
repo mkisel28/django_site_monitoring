@@ -1,0 +1,133 @@
+<div class="card-body width-100 button-wite">
+    <!-- Этап 1 -->
+    <div id="step1">
+        <form id="baseURLForm" method="post">
+            {% csrf_token %}
+            <input type="url" id="url" name="url" placeholder="URL сайта:">
+            <button type="submit">Перейти к следующему этапу</button>
+        </form>
+    </div>
+  
+    <!-- Этап 2 -->
+    <div id="step2" style="display:none;">
+        <form id="sitemapForm" method="post">
+            {% csrf_token %}
+            <div id="detailsFormContainer">
+                <i id="loadingIndicator" class="fas fa-circle-notch fa-spin" style="display: none;"></i>
+            </div>
+  
+        </form>
+    </div>
+  
+    <!-- Этап 3 -->
+    <div id="step3" style="display:none;">
+        <form id="detailsForm" method="post">
+            {% csrf_token %}
+            <div id="endFormContainer">
+                <i id="loadingIndicator" class="fas fa-circle-notch fa-spin" style="display: none;"></i>
+            </div>
+  
+        </form>
+    </div>
+  </div>
+  
+<script >
+    $(document).ready(function () {
+
+        // Этап 1: получаем список sitemap_url
+        $("#baseURLForm").submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: '{% url "users:fetch_sitemaps" %}', // URL вашего Django-представления для этапа 1
+                type: 'POST',
+                data: {
+                    'url': $('#url').val(),
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (data) {
+                    // Добавляем полученные sitemap_url в выпадающий список
+                    let sitemapDropdown = $('#sitemap_url_dropdown');
+                    sitemapDropdown.empty();
+                    $("#detailsFormContainer").html(data.form_html);
+
+                    $("#step1").hide();
+                    $("#step2").show();
+                },
+                error: function (error) {
+                    Swal.fire({
+                        title: 'Ошибка',
+                        text: 'Данные при обработке не были полученны',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    })
+                }
+            });
+        });
+
+        // Этап 2: парсим данные с выбранного sitemap_url или введенного пользователем
+        $("#sitemapForm").submit(function (event) {
+            event.preventDefault();
+            let selectedSitemap = $('#sitemap_url').val();
+            let inputSitemap = $('#customSitemap').val();
+
+
+            if (inputSitemap) { // Если URL был введен
+                // Задаем этот URL как выбранное значение в выпадающем списке
+                var sitemapToSend = inputSitemap;
+            } else {
+                var sitemapToSend = selectedSitemap;
+            }
+            $.ajax({
+                url: '{% url "users:fetch_website_details" %}', // URL  Django-представления для этапа 2
+                type: 'POST',
+                data: {
+                    'sitemap_url': sitemapToSend,
+
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (data) {
+                    // Здесь можно обновить поля формы на этапе 3 данными из ответа
+                    $('#name').val(data.name);
+                    $('#language').val(data.language);
+                    $("#endFormContainer").html(data.form_html);
+
+                    // Переходим к следующему этапу
+                    $("#step2").hide();
+                    $("#step3").show();
+                },
+                error: function (error) {
+                    Swal.fire({
+                        title: 'Ошибка',
+                        text: 'Ошибка при получении данных сайта. Попробуйте снова.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    })
+                }
+            });
+        });
+
+        // Этап 3: сохраняем все данные
+        $("#detailsForm").submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: '{% url "users:save_website" %}', // URL вашего Django-представления для этапа 3
+                type: 'POST',
+                data: $("#detailsForm").serialize(),
+                success: function (data) {
+
+                    alert("Сайт успешно сохранен!");
+                    $("#step3").hide();
+                    $("#step1").show();
+                },
+                error: function (error) {
+                    Swal.fire({
+                        title: 'Ошибка',
+                        text: 'Произошла ошибка при сохранении. Попробуйте заного',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    })
+                }
+            });
+        });
+    }); 
+</script>

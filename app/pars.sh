@@ -1,6 +1,5 @@
 #!/bin/bash
 
-chmod +x pars.sh
 if [ "$DATABASE" = "postgres" ]
 then
     # если база еще не запущена

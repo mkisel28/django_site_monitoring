@@ -8,12 +8,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SESSION_COOKIE_AGE = 1209600  
 DEBUG = True
-ALLOWED_HOSTS = ['95.164.84.80', '45.144.30.67' 'localhost', '127.0.0.1', '127.0.0.1:1337', '127.0.0.1:1137', "db"]
-CSRF_TRUSTED_ORIGINS = ['http://95.164.84.80:1137','http://45.144.30.67:1137' 'http://127.0.0.1:1137']
+ALLOWED_HOSTS = ['95.164.38.75:1137', '95.164.38.75', "db"]
+CSRF_TRUSTED_ORIGINS = ['http://95.164.38.75:1137', 'http://95.164.38.75']
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('POSTGRES_DB'),
         'USER': env('POSTGRES_USER'),
         'PASSWORD': env('POSTGRES_PASSWORD'),

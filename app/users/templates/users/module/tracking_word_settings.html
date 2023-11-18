@@ -1,18 +1,18 @@
 <div class="card mt-4">
-  <div class="card-header cardToggle">
-      <h3>Управление отслеживаемыми словами</h3>
-      <span class="float-right toggleText">Свернуть &#9650;</span> 
+    <div class="card-header cardToggle">
+        <h3>Управление отслеживаемыми словами</h3>
+        <span class="float-right toggleText">Свернуть &#9650;</span>
 
-  </div>
-  <div class="card-body" style="display: ;">
-      <form id="addWordForm" method="post" class="mb-3">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <button type="submit" class="btn btn-success">Добавить слово</button>
-      </form>
+    </div>
+    <div class="card-body" style="display: ;">
+        <form id="addWordForm" method="post" class="mb-3">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Добавить слово</button>
+        </form>
 
-      {% include "users/module/submodule/trecking_word_list.html" %}
+        {% include "users/module/submodule/tracking_word_list.html" %}
 
-      </ul>
-  </div>
+        </ul>
+    </div>
 </div>

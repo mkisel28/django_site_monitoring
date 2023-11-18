@@ -2,8 +2,7 @@
 {% load static %}
 {% block content %}
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
 
 <div class="live" id='live-tracking-page'> </div>
 <div class="widget all">
@@ -11,20 +10,13 @@
   {% include "main/tracked_word_cloud.html" %}
 </div>
 <div class="website-block" >
-  <div class="filters live">
-    <div class="checkbox-wrapper-34">
-        <input class='tgl tgl-ios' id='showOnlyFavorites' type='checkbox'>Отображать только избранные сайты
-        <label class='tgl-btn' for='showOnlyFavorites'></label>
-    </div>
-    <div class="date-picker-wrapper">
-        <label for="startDate">Дата начала:</label>
-        <input type="date" id="startDate">
-        <label for="endDate">Дата конца:</label>
-        <input type="date" id="endDate">
-    </div>
+  <div class="menu-toggle-aside" style="padding: 10px;">
+  <button class="menu-toggle-aside" aria-label="Open navigation menu">☰Фильтры</button>
   </div>
+  {% include "main/filters/live_section_filter.html"  %}
 
-  <ul>  </ul>
+
+  <ul class="list">  </ul>
 
 </div>
 {% comment %} <script src="{% static 'js/live_all.js' %}"  ></script> {% endcomment %}

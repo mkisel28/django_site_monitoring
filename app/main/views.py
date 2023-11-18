@@ -6,28 +6,14 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
 from .models import Website, Country, Article, Word, Configuration, TrackedWord, TrackedWordMention
+from users.models import Tab
 from django.db.models import Q
+from django.db.models import Case, When, Value, CharField
 
 from utils.date_helpers import apply_date_filter
 from utils.request_helpers import get_int_list_from_request
 from utils.query_helpers import build_search_query
 from utils.text_helpers import create_articles
-
-# from channels.layers import get_channel_layer
-# from asgiref.sync import async_to_sync
-
-# def new_post_published(post):
-#     channel_layer = get_channel_layer()
-#     async_to_sync(channel_layer.group_send)(
-#         "post_notifications", {
-#             "type": "post_notification",
-#             "message": f"A new post titled '{post}' has been published!"
-#         }
-#     )
-
-# def index(request):
-#     new_post_published("Test post")
-#     return render(request, 'main/index.html')
 
 
 @login_required(login_url="/")
@@ -47,10 +33,26 @@ def live_all(request):
     """
     config = Configuration.objects.first()
     TOP_COUNT = config.top_words_count
-    
+
     words = Word.objects.order_by('-id')[:TOP_COUNT]
 
     tracked_words = TrackedWord.objects.filter(user=request.user)
+
+    tabs = Tab.objects.filter(user=request.user)
+    countries = Country.objects.all()
+
+    favorite_countries = request.user.favorite_countries.all()
+    other_countries = Country.objects.exclude(id__in=favorite_countries)
+
+    favorite_sites = Website.objects.filter(
+        Q(user=None) | Q(user=request.user),
+        favorited_by=request.user
+    ).order_by('country__id')
+
+    other_sites = Website.objects.filter(
+        Q(user=None) | Q(user=request.user)
+    ).exclude(
+        favorited_by=request.user).order_by('country__id')
 
     # Создаем список словарей с каждым словом и его количеством упоминаний
     tracked_word_with_counts = []
@@ -63,7 +65,15 @@ def live_all(request):
         })
     return render(request, 'main/live.html', {'articles': None,
                                               'words': words[::-1],
-                                              "tracked_word_with_counts": tracked_word_with_counts})
+                                              "tracked_word_with_counts": tracked_word_with_counts,
+                                              "tabs": tabs,
+                                              "countries": countries,
+                                              'favorite_countries': favorite_countries,
+                                              'other_countries': other_countries,
+                                              'favorite_sites': favorite_sites,
+                                              'other_sites': other_sites,
+                                              'tracked_words': tracked_words
+                                              })
 
 
 @login_required(login_url="/")
@@ -147,7 +157,7 @@ def country_monitoring(request):
 
     tracked_words = TrackedWord.objects.filter(user=request.user)
 
-    #список словарей с каждым словом и его количеством упоминаний
+    # список словарей с каждым словом и его количеством упоминаний
     tracked_word_with_counts = []
     for tracked_word in tracked_words:
         mentions_count = TrackedWordMention.objects.filter(
@@ -366,27 +376,34 @@ def articles_for_related_data(request, data_id, data_type):
     # Применение аннотаций и возвращение результатов
     articles = base_query.filter(
         Q(website__user=None) | Q(website__user=request.user)
-        ).annotate(
-            is_favorite=Exists(
-                Website.objects.filter(
-                    id=OuterRef('website_id'), favorited_by=request.user
-                                      )
-                                )
-                    ).order_by("-published_at"
-                               ).values('id',
-                                        'title',
-                                        'title_translate',
-                                        'url',
-                                        'website__name',
-                                        'website__id',
-                                        'website__country__name',
-                                        'published_at',
-                                        'is_favorite')[:count_filter]
+    ).annotate(
+        is_favorite=Exists(
+            Website.objects.filter(
+                id=OuterRef('website_id'), favorited_by=request.user
+            )
+        )
+    ).annotate(
+        task_status=Case(
+            When(task__user=request.user, then='task__status'),
+            default=Value(None),
+            output_field=CharField()
+        )
+    ).order_by("-published_at"
+               ).values('id',
+                        'title',
+                        'title_translate',
+                        'url',
+                        'website__name',
+                        'website__id',
+                        'website__country__name',
+                        'published_at',
+                        'is_favorite',
+                        'task_status')[:count_filter]
 
     if len(articles) == 0:
         return JsonResponse({'error': 'Ничего не найдено'})
-    
-    articles = create_articles(articles)[::-1]
+
+    articles = create_articles(articles)
 
     return JsonResponse({'articles': list(articles)})
 
@@ -463,6 +480,30 @@ def remove_country_from_favorites_api(request, country_code):
 
 ########## ОСТАЛЬНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
+def get_tab_data_api(request):
+    tab_id = request.GET.get('tab_id')
+    if not tab_id:
+        return JsonResponse({'error': 'No tab id provided'}, status=400)
+
+    tab = get_object_or_404(Tab, pk=tab_id)
+
+    # Получение идентификаторов связанных стран и сайтов
+    country_ids = [country.id for country in tab.get_countries()]
+    website_ids = [website.id for website in tab.get_websites()]
+    tracked_word_ids = [
+        tracked_word.id for tracked_word in tab.get_tracked_words()]
+
+    data = {
+        'countries': country_ids,
+        'websites': website_ids,
+        'tracked_words': tracked_word_ids,
+    }
+
+    return JsonResponse(data)
+
+
+########## ОСТАЛЬНАЯ API-ТОЧКИ############
+@login_required(login_url="/")
 def test(request):
     """
     Объединенная API-точка для получения статей на основе различных критериев.
@@ -473,6 +514,11 @@ def test(request):
     live = request.GET.get('live')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+
+    selected_countries = get_int_list_from_request(
+        request, 'selected_countries')
+    selected_websites = get_int_list_from_request(request, 'websites')
+    selected_tracked_words = get_int_list_from_request(request, 'trackwords')
 
     if country_code:
         country = get_object_or_404(Country, code=country_code)
@@ -508,7 +554,28 @@ def test(request):
     if only_favorites:
         articles = articles.filter(website__favorited_by=request.user)
 
-    articles = articles.order_by("-published_at").values(
+    if selected_countries and selected_websites:
+        articles = articles.filter(
+            Q(website__country_id__in=selected_countries) | Q(
+                website_id__in=selected_websites)
+        )
+
+    elif selected_websites:
+        articles = articles.filter(website_id__in=selected_websites)
+    elif selected_countries:
+        articles = articles.filter(website__country_id__in=selected_countries)
+
+    if selected_tracked_words:
+        articles = articles.filter(
+            mentions__word__id__in=selected_tracked_words)
+
+    articles = articles.annotate(
+        task_status=Case(
+            When(task__user=request.user, then='task__status'),
+            default=Value(None),
+            output_field=CharField()
+        )
+    ).order_by("-published_at").values(
         'id',
         'title',
         'title_translate',
@@ -517,7 +584,8 @@ def test(request):
         'website__name',
         'website__id',
         'website__country__name',
-        'is_favorite'
+        'is_favorite',
+        'task_status'
     )[:100]
 
     articles = create_articles(articles)[::-1]

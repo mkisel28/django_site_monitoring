@@ -1,0 +1,100 @@
+{% extends 'users/static/base.html'  %}
+{% load static %}
+{% block content %}
+<section class="dashboard">
+  
+    <div class="top">
+        <i class="uil uil-bars sidebar-toggle"></i>
+
+        
+        <!--<img src="images/profile.jpg" alt="">-->
+    </div>
+    <div class="dash-content">
+
+        {% include "users/module/telegram_settings.html" %}
+
+    </div>
+
+
+
+
+</section>
+
+<script>
+  $(document).ready(function() {
+      $('.cardToggle').on('click', function() {
+          const cardBody = $(this).next('.card-body');
+          const toggleText = $(this).find('.toggleText');
+  
+          cardBody.slideToggle('slow', function() {
+              if (cardBody.is(':visible')) {
+                  toggleText.html("Свернуть &#9650;");
+              } else {
+                  toggleText.html("Развернуть &#9660;");
+              }
+          });
+      });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll('.toggle-details').forEach(function(toggle) {
+          toggle.addEventListener('click', function() {
+              var siteDetails = this.closest('.box').querySelector('.site-details');
+              if (siteDetails) {
+                siteDetails.classList.toggle('active');
+            }
+          });
+      });
+  });
+</script>
+
+<script>
+const body = document.querySelector("body"),
+    modeToggle = body.querySelector(".mode-toggle");
+sidebar = body.querySelector("nav");
+sidebarToggle = body.querySelector(".sidebar-toggle");
+let getMode = localStorage.getItem("mode");
+if (getMode && getMode === "dark") {
+    body.classList.toggle("dark");
+}
+let getStatus = localStorage.getItem("status");
+if (getStatus && getStatus === "close") {
+    sidebar.classList.toggle("close");
+}
+modeToggle.addEventListener("click", () => {
+    body.classList.toggle("dark");
+    if (body.classList.contains("dark")) {
+        localStorage.setItem("mode", "dark");
+    } else {
+        localStorage.setItem("mode", "light");
+    }
+});
+sidebarToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("close");
+    if (sidebar.classList.contains("close")) {
+        localStorage.setItem("status", "close");
+    } else {
+        localStorage.setItem("status", "open");
+    }
+})
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Получение URL текущей страницы
+    var currentPath = window.location.pathname;
+
+    // Поиск всех ссылок в навигации
+    var navLinks = document.querySelectorAll('.nav-links a');
+
+    // Перебор всех ссылок и добавление класса 'active' к активной
+    navLinks.forEach(function (link) {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+});
+</script>
+
+
+{% endblock %}

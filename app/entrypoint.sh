@@ -12,6 +12,7 @@ then
 
     echo "DB did run."
 fi
+python manage.py makemigrations
 python manage.py migrate
 
 if [ ! -f "db_loaded.txt" ]; then

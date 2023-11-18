@@ -2,10 +2,10 @@
   {% csrf_token %}
   <label for="sitemap_url">Выберите SITEMAP или введите свою:</label>
   <select id="sitemap_url" name="sitemap_url">
-      <option value="" selected>--- Выберите ---</option>
-      {% for sitemap in sitemaps %}
-          <option value="{{ sitemap }}">{{ sitemap }}</option>
-      {% endfor %}
+    <option value="" selected>--- Выберите ---</option>
+    {% for sitemap in sitemaps %}
+    <option value="{{ sitemap }}">{{ sitemap }}</option>
+    {% endfor %}
   </select>
   <br>
   <input type="text" placeholder="Или введите вашу ссылку на sitemap" id="custom_sitemap_url" name="custom_sitemap_url">
@@ -20,12 +20,13 @@
   <br>
   <select id="country" name="country">
     {% for country in countries %}
-        <option value="{{ country.id }}">{{ country.name }}</option>
+    <option value="{{ country.id }}">{{ country.name }}</option>
     {% endfor %}
-</select>
+  </select>
   <br>
   <label for="language">Язык сайта:</label>
-  <input type="text" id="language" name="language" value="{{ website_data.language }}" placeholder="Язык (например, ru, pl, en)">
+  <input type="text" id="language" name="language" value="{{ website_data.language }}"
+    placeholder="Язык (например, ru, pl, en)">
   <br>
   <label for="base_url">Базовый URL:</label>
   <input type="url" id="base_url" name="base_url" value="{{ website_data.base_url }}" readonly>

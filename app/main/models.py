@@ -56,12 +56,58 @@ class Website(models.Model):
 
     
 class Article(models.Model):
+    class CategoryChoices(models.TextChoices):
+        PARENTS = 'PARENTS', 'Родители'
+        WELLNESS = 'WELLNESS', 'Здоровье'
+        PARENTING = 'PARENTING', 'Воспитание'
+        COMEDY = 'COMEDY', 'Комедия'
+        POLITICS = 'POLITICS', 'Политика'
+        BLACK_VOICES = 'BLACK VOICES', 'Черные Голоса'
+        QUEER_VOICES = 'QUEER VOICES', 'Квир-Голоса'
+        ENTERTAINMENT = 'ENTERTAINMENT', 'Развлечения'
+        CULTURE_ARTS = 'CULTURE & ARTS', 'Культура и Искусство'
+        TECH = 'TECH', 'Технологии'
+        RELIGION = 'RELIGION', 'Религия'
+        STYLE_BEAUTY = 'STYLE & BEAUTY', 'Стиль и Красота'
+        HEALTHY_LIVING = 'HEALTHY LIVING', 'Здоровый Образ Жизни'
+        TRAVEL = 'TRAVEL', 'Путешествия'
+        GREEN = 'GREEN', 'Экология'
+        IMPACT = 'IMPACT', 'Влияние'
+        BUSINESS = 'BUSINESS', 'Бизнес'
+        DIVORCE = 'DIVORCE', 'Развод'
+        SCIENCE = 'SCIENCE', 'Наука'
+        SPORTS = 'SPORTS', 'Спорт'
+        LATINO_VOICES = 'LATINO VOICES', 'Латиноамериканские Голоса'
+        WORLD_NEWS = 'WORLD NEWS', 'Мировые Новости'
+        HOME_LIVING = 'HOME & LIVING', 'Дом и Жизнь'
+        MEDIA = 'MEDIA', 'Медиа'
+        US_NEWS = 'U.S. NEWS', 'Новости США'
+        TASTE = 'TASTE', 'Вкус'
+        FOOD_DRINK = 'FOOD & DRINK', 'Еда и Напитки'
+        WEIRD_NEWS = 'WEIRD NEWS', 'Странные Новости'
+        STYLE = 'STYLE', 'Стиль'
+        WOMEN = 'WOMEN', 'Женщины'
+        ARTS_CULTURE = 'ARTS & CULTURE', 'Искусство и Культура'
+        CRIME = 'CRIME', 'Преступность'
+        MONEY = 'MONEY', 'Деньги'
+        WEDDINGS = 'WEDDINGS', 'Свадьбы'
+        ARTS = 'ARTS', 'Искусства'
+        WORLDPOST = 'WORLDPOST', 'Мировой Пост'
+        THE_WORLDPOST = 'THE WORLDPOST', 'Мировой Пост (THE)'
+        EDUCATION = 'EDUCATION', 'Образование'
+        COLLEGE = 'COLLEGE', 'Колледж'
+        GOOD_NEWS = 'GOOD NEWS', 'Хорошие Новости'
+        FIFTY = 'FIFTY', 'Пятьдесят'
+        ENVIRONMENT = 'ENVIRONMENT', 'Окружающая Среда'
+        
     website = models.ForeignKey(Website, on_delete=models.CASCADE, related_name="articles", verbose_name="Сайт", db_index=True)
     title = models.TextField(verbose_name="Название статьи")
     url = models.URLField(max_length=1000, unique=True, verbose_name="Ссылка на статью")
     published_at = models.DateTimeField(verbose_name="Дата публикации", db_index=True)
     title_translate = models.TextField(verbose_name="Перевод названия", blank=True, null=True)
+    eng_title = models.TextField(verbose_name="Название статьи на английском", blank=True, null=True)
     normalized_title = models.TextField(verbose_name="Название статьи в начальной форме", blank=True, null=True)
+    category = models.CharField(max_length=50, choices=CategoryChoices.choices, verbose_name="Категория", blank=True, null=True, db_index=True)
 
     def __str__(self):
         return self.title
@@ -145,8 +191,12 @@ class TrackedWord(models.Model):
         # Проверяем все статьи на наличие этого слова
         articles_with_word = get_articles_with_word(self.keyword, Article)
         # Создаем записи в TrackedWordMention для каждой статьи, содержащей это слово
-        for article in articles_with_word:
-            TrackedWordMention.objects.get_or_create(word=self, article=article, mentioned_at= article.published_at)
+        mentions_to_create = [
+            TrackedWordMention(word=self, article=article, mentioned_at=article.published_at)
+            for article in articles_with_word
+            if not TrackedWordMention.objects.filter(word=self, article=article).exists()
+        ]
+        TrackedWordMention.objects.bulk_create(mentions_to_create)
 
 
 class TrackedWordMention(models.Model):
@@ -155,7 +205,7 @@ class TrackedWordMention(models.Model):
     mentioned_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.word
+        return self.word.keyword
     class Meta:
         unique_together = ('word', 'article')
 

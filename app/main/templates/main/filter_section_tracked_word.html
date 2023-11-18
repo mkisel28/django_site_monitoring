@@ -1,101 +1,100 @@
 <div class="filters" id="filter-conteiner" style="display: none;">
-  <div class="filter-section">
-      <select id="dateFilter">
-          <option value="all">За все время</option>
-          <option value="today">За сегодня</option>
-          <option value="week">За последнюю неделю</option>
-          <option value="month">За последний месяц</option>
+    <div class="filter-section">
+        <select id="dateFilter">
+            <option value="all">За все время</option>
+            <option value="today">За сегодня</option>
+            <option value="week">За последнюю неделю</option>
+            <option value="month">За последний месяц</option>
+        </select>
+    </div>
+    <div class="filter-section">
+  
+      <select id="countFilter">
+          <option value="10">Отображать последние 10</option>
+          <option value="25">Отображать последние 25</option>
+          <option value="50">Отображать последние 50</option>
+          <option value="1000">Отображать все</option>
       </select>
   </div>
-  <div class="filter-section">
-
-    <select id="countFilter">
-        <option value="10">Отображать последние 10</option>
-        <option value="25">Отображать последние 25</option>
-        <option value="50">Отображать последние 50</option>
-        <option value="1000">Отображать все</option>
-    </select>
-</div>
-  <div class="filter-section">
-    <select id="countriesFilter" multiple="multiple">
-      <optgroup label="Избранные страны:" >
-        <option value="{% for site in favorite_countries %}{{ site.id  }},{% endfor %}">Все избранные страны</option>
-
-        {% for site in favorite_countries %}
-        <option value="{{ site.id }}">{{ site.name }}</option>
-        {% endfor %}
-        </optgroup>
-        <optgroup label="Остальные страны">
-        {% for site in other_countries %}
-        <option value="{{ site.id }}">{{ site.name }}</option>
-        {% endfor %}
-        </optgroup>
-    </select>
-</div>
-
-<div class="filter-section">
-    <select id="websitesFilter" data-fill-from=".js-code-example-templating" multiple="multiple">
-      <optgroup label="Избранные сайты:" >
-        <option value="{% for site in favorite_sites %}{{ site.id  }},{% endfor %}">Все избранные сайты</option>
-
-        {% for site in favorite_sites %}
-        <option value="{{ site.id }}">{{ site.name }}</option>
-        {% endfor %}
-        </optgroup>
-        <optgroup label="Остальные сайты">
-        {% for site in other_sites %}
-        <option value="{{ site.id }}">{{ site.name }}</option>
-        {% endfor %}
-        </optgroup>
-    </select>
-</div>
-<button id="applyFilters">Применить фильтры</button>
-</div>
-
-
-
-<script>
-
-
-
+    <div class="filter-section">
   
-  function formatDateTime(dateTimeStr) {
-var date = new Date(dateTimeStr);
-var day = String(date.getDate()).padStart(2, '0');
-var month = String(date.getMonth() + 1).padStart(2, '0');
-var year = date.getFullYear();
-var hours = String(date.getHours()).padStart(2, '0');
-var minutes = String(date.getMinutes()).padStart(2, '0');
-return `${day}.${month}.${year} г. ${hours}:${minutes}`;
-}
+      <select id="countriesFilter" multiple="multiple">
+          
+        <optgroup label="Избранные страны:" >
+          <option value="{% for site in favorite_countries %}{{ site.id  }},{% endfor %}">Все избранные страны</option>
+  
+          {% for site in favorite_countries %}
+          <option value="{{ site.id }}">{{ site.name }}</option>
+          {% endfor %}
+          </optgroup>
+          <optgroup label="Остальные страны">
+          {% for site in other_countries %}
+          <option value="{{ site.id }}">{{ site.name }}</option>
+          {% endfor %}
+          </optgroup>
+      </select>
+  </div>
+  
+  <div class="filter-section">
+      <select id="websitesFilter" data-fill-from=".js-code-example-templating" multiple="multiple">
+        <optgroup label="Избранные сайты:" >
+          <option value="{% for site in favorite_sites %}{{ site.id  }},{% endfor %}">Все избранные сайты</option>
+  
+          {% for site in favorite_sites %}
+          <option value="{{ site.id }}">{{ site.name }}</option>
+          {% endfor %}
+          </optgroup>
+          <optgroup label="Остальные сайты">
+          {% for site in other_sites %}
+          <option value="{{ site.id }}">{{ site.name }}</option>
+          {% endfor %}
+          </optgroup>
+      </select>
+  </div>
+  <button id="applyFilters">Применить фильтры</button>
+  </div>
+  
+  
+<script >
 
 
-document.addEventListener("DOMContentLoaded", function() {
-    
+    function formatDateTime(dateTimeStr) {
+        var date = new Date(dateTimeStr);
+        var day = String(date.getDate()).padStart(2, '0');
+        var month = String(date.getMonth() + 1).padStart(2, '0');
+        var year = date.getFullYear();
+        var hours = String(date.getHours()).padStart(2, '0');
+        var minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${day}.${month}.${year} г. ${hours}:${minutes}`;
+    }
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
     $('#countriesFilter').select2({
         placeholder: "Выберите страны",
         width: '100%',
-        minimumResultsForSearch: 0 
+
     });
     $('#websitesFilter').select2({
         placeholder: "Выберите сайты",
         width: '100%',
-        minimumResultsForSearch: 0 
+
     });
 
 
     const words = document.querySelectorAll('.word');
 
     const clickableElements = document.querySelectorAll('[data-word-id], [data-treck-cloud-id]');
-    const articlesListDiv = document.querySelector('.articles-list');
+    const articlesListDiv = document.querySelector('.tags-list');
     const articlesList = articlesListDiv.querySelector('ul');
-    let lastClickedWord = null; 
+    let lastClickedWord = null;
     let treckWordConteinerElement = document.getElementById('treck_word-conteiner');
     let cloudConteinerElement = document.getElementById('cloud-conteiner');
     let filerConteinerElement = document.getElementById('filter-conteiner');
 
 
-    document.getElementById('applyFilters').addEventListener('click', function(e) {
+    document.getElementById('applyFilters').addEventListener('click', function (e) {
         if (lastClickedWord) {
             let dataId, dataType;
             if (lastClickedWord.hasAttribute('data-word-id')) {
@@ -106,14 +105,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 dataType = "track";
             }
             const dateValue = $('#dateFilter').val();
-            const countriesValues = $('#countriesFilter').val();  // получение списка выбранных стран
-            const websitesValues = $('#websitesFilter').val();  
-            const countValues = $('#countFilter').val();  
+            const countriesValues = $('#countriesFilter').val(); // получение списка выбранных стран
+            const websitesValues = $('#websitesFilter').val();
+            const countValues = $('#countFilter').val();
             let queryParams = new URLSearchParams();
             if (dateValue) queryParams.append('date', dateValue);
             if (countriesValues) queryParams.append('countries', countriesValues.join(','));
             if (websitesValues) queryParams.append('websites', websitesValues.join(','));
-            if (websitesValues) queryParams.append('count',countValues);
+            if (websitesValues) queryParams.append('count', countValues);
             fetchArticles(dataId, dataType, queryParams);
         } else {
             alert("Пожалуйста, выберите слово перед применением фильтров.");
@@ -121,42 +120,42 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     words.forEach(word => {
-        word.addEventListener('click', function() {
-        // Если последнее нажатое слово и текущее слово совпадают, скрываем список и выходим
-          if (lastClickedWord === word) {
-              articlesListDiv.style.display = 'none';
-              filerConteinerElement.style.display = 'none';
-              lastClickedWord = null;
-              treckWordConteinerElement.style.display = 'block';
-              cloudConteinerElement.style.display = 'block';
-              return;
-          }
+        word.addEventListener('click', function () {
+            // Если последнее нажатое слово и текущее слово совпадают, скрываем список и выходим
+            if (lastClickedWord === word) {
+                articlesListDiv.style.display = 'none';
+                filerConteinerElement.style.display = 'none';
+                lastClickedWord = null;
+                treckWordConteinerElement.style.display = 'block';
+                cloudConteinerElement.style.display = 'block';
+                return;
+            }
 
-          lastClickedWord = word;  
-          let dataId, dataType;
-          if (word.hasAttribute('data-word-id')) {
-              dataId = word.getAttribute('data-word-id');
-              treckWordConteinerElement.style.display = 'none';
-              filerConteinerElement.style.display = 'block';
+            lastClickedWord = word;
+            let dataId, dataType;
+            if (word.hasAttribute('data-word-id')) {
+                dataId = word.getAttribute('data-word-id');
+                treckWordConteinerElement.style.display = 'none';
+                filerConteinerElement.style.display = 'block';
 
-              dataType = "word";
-          } else if (word.hasAttribute('data-treck-cloud-id')) {
-              dataId = word.getAttribute('data-treck-cloud-id');
-              cloudConteinerElement.style.display = 'none';
-              filerConteinerElement.style.display = 'block';
+                dataType = "word";
+            } else if (word.hasAttribute('data-treck-cloud-id')) {
+                dataId = word.getAttribute('data-treck-cloud-id');
+                cloudConteinerElement.style.display = 'none';
+                filerConteinerElement.style.display = 'block';
 
-              dataType = "track";
-          }
-          //настройка фильтрации
-          const dateValue = $('#dateFilter').val();
-          const countriesValues = $('#countriesFilter').val();  // получение списка выбранных стран
-          const websitesValues = $('#websitesFilter').val();  
-          const countValues = $('#countFilter').val();  
-          const  queryParams = new URLSearchParams();
-          if (dateValue) queryParams.append('date', dateValue);
-          if (countriesValues) queryParams.append('countries', countriesValues.join(','));
-          if (websitesValues) queryParams.append('websites', websitesValues.join(','));
-          if (websitesValues) queryParams.append('count',countValues);
+                dataType = "track";
+            }
+            //настройка фильтрации
+            const dateValue = $('#dateFilter').val();
+            const countriesValues = $('#countriesFilter').val(); // получение списка выбранных стран
+            const websitesValues = $('#websitesFilter').val();
+            const countValues = $('#countFilter').val();
+            const queryParams = new URLSearchParams();
+            if (dateValue) queryParams.append('date', dateValue);
+            if (countriesValues) queryParams.append('countries', countriesValues.join(','));
+            if (websitesValues) queryParams.append('websites', websitesValues.join(','));
+            if (websitesValues) queryParams.append('count', countValues);
 
             fetchArticles(dataId, dataType, queryParams)
         });
@@ -165,85 +164,79 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 function fetchArticles(dataId, dataType, queryParams) {
-const articlesListDiv = document.querySelector('.articles-list');
-const articlesList = articlesListDiv.querySelector('ul');
+    const articlesListDiv = document.querySelector('.tags-list');
+    const articlesList = articlesListDiv.querySelector('ul');
 
-fetch(`/api/articles_for_related_data/${dataType}/${dataId}/?${queryParams}`)    .then(response => {
-    if (!response.ok) {
-        throw response;
-    }
-    return response.json();
-})
-.then(data => {
-    articlesList.innerHTML = '';
-    data.articles.forEach(article => {
-        const li = document.createElement('li');
-        li.setAttribute('data-id', article.id);
+    fetch(`/api/articles_for_related_data/${dataType}/${dataId}/?${queryParams}`).then(response => {
+            if (!response.ok) {
+                throw response;
+            }
+            return response.json();
+        })
+        .then(data => {
+            articlesList.innerHTML = '';
+            data.articles.forEach(article => {
+                var formattedDate = formatDateTime(article.published_at);
+                
+                var favoriteIcon = article.is_favorite ?
+                    `<a href="#" class="toggle-favorite" data-action="/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
+                    `<a href="#" class="toggle-favorite" data-action="/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
+                
+                var taskIcon = article.task_status ?
+                    `<a href="#" class="toggle-task" data-action="/update_task/${article.id}/"><i class="fas fa-tasks" style="color: #005eff;"></i></a>` :
+                    `<a href="#" class="toggle-task" data-action="/add_task/${article.id}/"><i class="fas fa-tasks"></i></a>`;
+    
+                
+                var taskClass = '';
+                if (article.task_status === 'pending') {
+                    taskClass = 'task-pending';
+                } else if (article.task_status === 'in_progress') {
+                    taskClass = 'task-in-progress';
+                } else if (article.task_status === 'completed') {
+                    taskClass = 'task-completed';
+                }
+                articlesList.innerHTML += `
+                <li data-id="${article.id}" class="${taskClass}">
+                    <div class="website-url  ">
+                        <div class="icons">${favoriteIcon} ${taskIcon}</div>
+                        <div class="article-info">
+                            <div class="country">${article.website__country__name}</div>
+                            <div class="article-title">
+                                <a href="${article.url}">${article.title}</a>
+                            </div>
+                            <div class="article-date">
+                                <span class="publish-date">${formattedDate}</span>
+                                <span class="publish-date">${article.website__name}</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                `;
+                
+            });
+            articlesListDiv.style.display = 'block';
         
-        const websiteUrlDiv = document.createElement('div');
-        websiteUrlDiv.classList.add('website-url');
+        }).catch(error => {
+            articlesList.innerHTML = '';
+            const errorDiv = document.createElement('div');
+            errorDiv.setAttribute('data-id', "error");
+            errorDiv.classList.add('error');
 
+            const websiteUrlDiv = document.createElement('div');
+            websiteUrlDiv.classList.add('website-url');
 
-        const articleTitleDiv = document.createElement('div');
-        articleTitleDiv.classList.add('article-title');
-        const aTitle = document.createElement('a');
-        aTitle.href = article.url;
-        aTitle.textContent = article.title;
-        articleTitleDiv.appendChild(aTitle);
+            const articleTitleDiv = document.createElement('div');
+            articleTitleDiv.classList.add('article-title');
+            const aTitle = document.createElement('a');
+            aTitle.href = "#";
+            aTitle.textContent = "Произошла ошибка при выполнении запроса.";
+            articleTitleDiv.appendChild(aTitle);
 
-        const articleDateDiv = document.createElement('div');
-        articleDateDiv.classList.add('article-date');
-        const spanWebsite = document.createElement('span');
-        spanWebsite.classList.add('publish-date');
-        var favoriteIcon = article.is_favorite ?
-        `<a href="#" class="toggle-favorite" data-action="/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
-        `<a href="#" class="toggle-favorite" data-action="/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
+            websiteUrlDiv.appendChild(articleTitleDiv);
+            errorDiv.appendChild(websiteUrlDiv);
+            articlesList.appendChild(errorDiv);
 
-        spanWebsite.innerHTML = favoriteIcon + ' ' + article.website__name;
-        const spanDate = document.createElement('span');
-        spanDate.classList.add('publish-date');
-        spanDate.textContent = formatDateTime(article.published_at); 
-        const spanCountry = document.createElement('span');
-        
-        spanCountry.classList.add('publish-date');
-        spanCountry.textContent = article.website__country__name;; 
-
-        
-
-        articleDateDiv.appendChild(spanWebsite);
-        articleDateDiv.appendChild(spanDate);
-        articleDateDiv.appendChild(spanCountry);
-
-        websiteUrlDiv.appendChild(articleTitleDiv);
-        websiteUrlDiv.appendChild(articleDateDiv);
-
-        li.appendChild(websiteUrlDiv);
-
-        articlesList.appendChild(li);
-    });
-    articlesListDiv.style.display = 'block';
-})    .catch(error => {
-    articlesList.innerHTML = '';
-    const errorDiv = document.createElement('div');
-    errorDiv.setAttribute('data-id', "error");
-    errorDiv.classList.add('error');
-
-    const websiteUrlDiv = document.createElement('div');
-    websiteUrlDiv.classList.add('website-url');
-
-    const articleTitleDiv = document.createElement('div');
-    articleTitleDiv.classList.add('article-title');
-    const aTitle = document.createElement('a');
-    aTitle.href = "#";
-    aTitle.textContent = "Произошла ошибка при выполнении запроса.";
-    articleTitleDiv.appendChild(aTitle);
-
-    websiteUrlDiv.appendChild(articleTitleDiv);
-    errorDiv.appendChild(websiteUrlDiv);
-    articlesList.appendChild(errorDiv);
-
-});
+        });
 }
 
 </script>
-

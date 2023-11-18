@@ -41,7 +41,13 @@ def format_date(published_at_str, website_id):
 
 def get_resource(url):
     headers = get_headers()
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+    except (requests.exceptions.ConnectTimeout, requests.exceptions.Timeout):
+        try:
+            response = requests.get(url, timeout=10)
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.Timeout):
+            raise Exception("Timed out")
     response.raise_for_status() 
     return response.text
 
