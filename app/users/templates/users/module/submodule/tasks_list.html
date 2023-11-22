@@ -1,4 +1,3 @@
-{% csrf_token %}
 {% for task in tasks %}
 <li class="list-group-item task-item" data-id="{{ task.article.id }}" data-status="{{ task.status }}" data-priority="{{ task.priority }}">
   <div class="d-flex justify-content-between align-items-center">

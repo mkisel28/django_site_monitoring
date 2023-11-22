@@ -1,6 +1,7 @@
-from django.shortcuts import get_object_or_404
 import pymorphy2
 import re
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 from django.db import models
@@ -9,7 +10,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from utils.query_helpers import get_articles_with_word
-
+from django.db.models import Count
+import datetime
 
 
 class UserProfile(models.Model):
@@ -112,6 +114,14 @@ class Article(models.Model):
     def __str__(self):
         return self.title
 
+    @classmethod
+    def get_sorted_categories(cls):
+        one_week_ago = timezone.now() - datetime.timedelta(weeks=3)
+        category_counts = cls.objects.filter(published_at__gte=one_week_ago).values('category').annotate(count=Count('category')).order_by('-count')
+
+        sorted_categories = sorted(cls.CategoryChoices.choices, key=lambda x: next((item['count'] for item in category_counts if item['category'] == x[0]), 0), reverse=True)
+
+        return sorted_categories
 
     @classmethod
     def create(cls, website, title, url, published_at):
@@ -185,7 +195,7 @@ class TrackedWord(models.Model):
         unique_together = ('user', 'keyword')
 
     def save(self, *args, **kwargs):
-        # Сначала сохраняем слово
+        #  сохраняем слово
         super(TrackedWord, self).save(*args, **kwargs)
         
         # Проверяем все статьи на наличие этого слова
@@ -234,8 +244,13 @@ class Configuration(models.Model):
 
 
 
+#Создание UserProfile при реигстрации нового пользователя
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
 
-
+post_save.connect(create_user_profile, sender=User)
 
 
 

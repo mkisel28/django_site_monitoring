@@ -1,23 +1,50 @@
 import json
-from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.sessions.models import Session
+from django.core.paginator import Paginator
+from django.http import HttpResponseBadRequest, JsonResponse
+from django.template.loader import render_to_string
+from django.db.utils import IntegrityError
+from django.db.models import Q
+
+from .models import Tab, Task, UserDevice
+from main.models import Article, TrackedWord, TrackedWordMention, Country, Website
+
+from .forms import RegistrationForm, TrackedWordForm, AddWebsiteForm, SitemapChoiceForm
+
+from .services import TaskService
 from utils.request_helpers import get_int_list_from_request
 from parser_app.parsers.search.test import find_rss_sitemap, get_rss_feed_info
-from main.models import Article, TrackedWord, TrackedWordMention
-from .forms import RegistrationForm, TrackedWordForm, AddWebsiteForm, SitemapChoiceForm
-from django.http import HttpResponseBadRequest
-from django.template.loader import render_to_string
-from main.models import Country, Website
-from django.db.models import Q
-from .models import Tab, Task
-from django.views.decorators.http import require_POST
 
-from django.db.utils import IntegrityError
+
+
+from django.views.decorators.http import require_http_methods, require_POST
+
+@require_http_methods(["POST"])
+def finger(request):
+    fingerprint_data = json.loads(request.body)
+
+    user = request.user
+    user_sessions = UserDevice.objects.filter(user=user)
+    if not UserDevice.objects.filter(device_info=fingerprint_data).exists():
+        session_key = request.session.session_key
+        
+        if user_sessions.count() >= 3:
+            oldest_session = user_sessions.first()
+            UserDevice.objects.filter(device_info=oldest_session.device_info).delete()
+            Session.objects.filter(session_key=oldest_session.session_key).delete()
+            
+        UserDevice.objects.create(user=user, session_key=session_key, device_info=fingerprint_data)
+
+
+    response_data = {
+        'status': 'success'
+    }
+    return JsonResponse(response_data)
 
 
 def user_login(request):
@@ -131,7 +158,7 @@ def dashboard_trackword(request):
         {"form": form, "words_with_counts": words_with_counts},
     )
 
-
+@login_required(login_url="/")
 def dashboard_collection(request):
     countries = Country.objects.all()
     websites = Website.objects.filter(Q(user=request.user) | Q(user=None))
@@ -140,7 +167,6 @@ def dashboard_collection(request):
     all_websites = websites
     all_countries = countries
     all_tracked_words = TrackedWord.objects.filter(user=request.user)
-    print(all_tracked_words)
 
     return render(
         request,
@@ -155,7 +181,7 @@ def dashboard_collection(request):
         },
     )
 
-
+@login_required(login_url="/")
 def dashboard_sites(request):
     return render(request, "users/dashboard_sites.html")
 
@@ -168,7 +194,6 @@ def api_manage_tab(request):
         tab = Tab.objects.create(user=request.user, name=data["name"])
 
         for website_id in data.get("websites", []):
-            print(type(int(website_id)), int(website_id))
             tab.add_website(int(website_id))
         for country_id in data.get("countries", []):
             tab.add_country(country_id)
@@ -356,31 +381,16 @@ def update_tab(request):
 @login_required(login_url="/")
 def api_task_create(request):
     if request.method == "POST":
-        user = request.user
-        article_id = request.POST.get('article_id')
-        print(article_id)
-        status = request.POST.get('status')
-        priority = request.POST.get('priority')
-
         try:
-            # Проверка, существует ли статья
-            article = Article.objects.get(id=article_id)
-
-            # Создание новой задачи
-            task = Task.objects.create(
-                user=user,
-                article=article,
-                status=status,
-                priority=priority
+            TaskService.create_task(
+                user=request.user,
+                article_id=request.POST.get('article_id'),
+                status=request.POST.get('status'),
+                priority=request.POST.get('priority')
             )
-            task.save()
-
-
             return JsonResponse({'success': True})
-
         except Article.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Article not found'}, status=404)
-
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
@@ -388,18 +398,13 @@ def api_task_create(request):
 @login_required(login_url="/")   
 def api_task_update(request):
     if request.method == 'POST':
-        article_id = request.POST.get('article_id')
-        status = request.POST.get('status')
-        priority = request.POST.get('priority')
-
-        # Проверка на существование задачи
         try:
-            task = Task.objects.get(article_id=article_id, user=request.user)
-            if status:
-                task.status = status
-            if priority:
-                task.priority = priority
-            task.save()
+            TaskService.update_task(
+                article_id=request.POST.get('article_id'),
+                user=request.user,
+                status=request.POST.get('status'),
+                priority=request.POST.get('priority')
+            )
             return JsonResponse({'status': 'success', 'message': 'Задача обновлена'})
         except Task.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Задача не найдена'}, status=404)
@@ -407,25 +412,13 @@ def api_task_update(request):
     return JsonResponse({'status': 'error', 'message': 'Неверный запрос'}, status=400)
 
 
-def api_get_all_tasks(request):
 
-    status_filter = request.GET.get('status')
-    priority_filter = request.GET.get('priority')
-    
-    tasks = Task.objects.filter(user=request.user)
-    if status_filter:
-        tasks = tasks.filter(status=status_filter)
-    if priority_filter:
-        tasks = tasks.filter(priority=priority_filter)
 
-    # Рендеринг списка задач
-    html = render_to_string('users/module/submodule/tasks_list.html', {'tasks': tasks})
-    return JsonResponse({'html': html})
 
 @login_required(login_url="/")
-def api_task_info(request, task_id):
+def api_task_info(request, article_id):
     try:
-        task = Task.objects.get(article=task_id, user=request.user)
+        task = TaskService.get_task(article_id=article_id, user=request.user)
         return JsonResponse({
             'id': task.id,
             'article_id': task.article.id,
@@ -441,12 +434,15 @@ def api_task_info(request, task_id):
     
     
     
-    
-def api_tasks(request):
-    tasks = Task.objects.all()
-    data = list(tasks.values(
-        'id', 'user__username', 'article__title', 'status', 'priority', 
-        'created_at', 'updated_at'
-    ))
-
-    return JsonResponse(data, safe=False)
+@login_required(login_url="/")
+def api_get_all_tasks(request):
+    try:
+        tasks = TaskService.get_all_tasks(
+            user=request.user,
+            status_filter=request.GET.get('status'),
+            priority_filter=request.GET.get('priority')
+        )
+        html = render_to_string('users/module/submodule/tasks_list.html', {'tasks': tasks})
+        return JsonResponse({'html': html})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

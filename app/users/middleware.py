@@ -9,7 +9,9 @@ class UpdateLastLoginMiddleware:
         response = self.get_response(request)
 
         # Обновление даты последнего входа
-        if request.user.is_authenticated:
+        if request.user and  request.user.is_authenticated:
             User.objects.filter(id=request.user.id).update(last_login=timezone.now())
 
         return response
+    
+    

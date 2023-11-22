@@ -46,16 +46,21 @@
     {% include "main/filter_panel.html" %}
     <div class="websites">
         {% for website in websites %}
-        <div class="website-block" data-id="{{website.id}}" data-url="{% url 'main:website_articles' website.id %}">
-            <div class="country">{{ website.country.name }}</div>
-            {% if website in request.user.favorite_websites.all %}
-            <a href="#" class="toggle-favorite" data-action="{% url 'main:remove_favorite' website.id %}"><i
-                    class="fas fa-star"></i></a> <!-- Звезда для избранных -->
-            {% else %}
-            <a href="#" class="toggle-favorite" data-action="{% url 'main:add_favorite' website.id %}"><i
-                    class="far fa-star"></i></a> <!-- Пустая звезда для неизбранных -->
-            {% endif %}
-            <h2>{{ website.name }}</h2>
+        <div class="website-block" data-id="{{ website.id }}" data-url="{% url 'main:website_articles' website.id %}">
+            <div class="website-header">
+                {% if website in request.user.favorite_websites.all %}
+                <a href="#" class="toggle-favorite" data-action="{% url 'main:remove_favorite' website.id %}"><i
+                        class="fas fa-star"></i></a> <!-- Звезда для избранных -->
+                {% else %}
+                <a href="#" class="toggle-favorite" data-action="{% url 'main:add_favorite' website.id %}"><i
+                        class="far fa-star"></i></a> <!-- Пустая звезда для неизбранных -->
+                {% endif %}
+                
+                <h2>{{ website.name }}</h2>
+                
+                <div class="country">{{ website.country.name }}</div>
+            </div>
+
             <ul class="website-list">
 
             </ul>
@@ -68,17 +73,20 @@
     <h1>Страны</h1>
     <div class="websites">
         {% for country in countries %}
-        <div class="website-block" data-id="{{country.id}}" data-url="{% url 'main:website_articles' country.id %}">
-            <div class="country">{{ website.country.name }}</div>
-            {% if country in request.user.favorite_countries.all %}
-            <a href="#" class="toggle-favorite" data-action="{% url 'main:remove_favorite' country.id %}"><i
-                    class="fas fa-star"></i></a> <!-- Звезда для избранных -->
-            {% else %}
-            <a href="#" class="toggle-favorite" data-action="{% url 'main:add_favorite' country.id %}"><i
-                    class="far fa-star"></i></a> <!-- Пустая звезда для неизбранных -->
-            {% endif %}
-            <h2>{{ country.name }}</h2>
+        <div class="website-block" data-id="{{ country.id }}" data-url="{% url 'main:website_articles' country.id %}">
+            <div class="website-header">
+                {% if country in request.user.favorite_countries.all %}
+                <a href="#" class="toggle-favorite" data-action="{% url 'main:remove_favorite' country.id %}"><i
+                        class="fas fa-star"></i></a> <!-- Звезда для избранных -->
+                {% else %}
+                <a href="#" class="toggle-favorite" data-action="{% url 'main:add_favorite' country.id %}"><i
+                        class="far fa-star"></i></a> <!-- Пустая звезда для неизбранных -->
+                {% endif %}
 
+                <h2>{{ country.name }}</h2>
+                <div class="country">{{ website.country.name }}</div>
+
+            </div>
             <ul class="website-list">
 
             </ul>

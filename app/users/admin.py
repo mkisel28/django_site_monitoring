@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Tab, TabCountry, TabTrackedWord, TabWebsite, Task, Comment
+from .models import Tab, TabCountry, TabTrackedWord, TabWebsite, Task, Comment, UserDevice
 
 
 # Register your models here.
@@ -52,3 +52,11 @@ class CommentAdmin(admin.ModelAdmin):
     list_filter = ('created_at', 'user')
     search_fields = ('task__article__title', 'user__username', 'text')
     date_hierarchy = 'created_at'
+    
+    
+@admin.register(UserDevice)
+class UserDeviceAdmin(admin.ModelAdmin):
+    list_display = ('id','user', 'device_info')
+    list_filter = ('user',)
+    search_fields = ('user__username', 'device_info')
+    raw_id_fields = ('user',)

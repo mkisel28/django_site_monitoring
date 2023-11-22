@@ -109,6 +109,7 @@ class Article(models.Model):
     title = models.TextField(verbose_name="Название статьи")
     url = models.URLField(max_length=1000, unique=True, verbose_name="Ссылка на статью")
     published_at = models.DateTimeField(verbose_name="Дата публикации", db_index=True)
+    title_translate = models.TextField(verbose_name="Перевод названия", blank=True, null=True)
     eng_title = models.TextField(verbose_name="Название статьи на английском", blank=True, null=True)
     normalized_title = models.TextField(verbose_name="Название статьи в начальной форме", blank=True, null=True)
     category = models.CharField(max_length=50, choices=CategoryChoices.choices, verbose_name="Категория", blank=True, null=True, db_index=True)

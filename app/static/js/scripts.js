@@ -17,13 +17,13 @@ function updateArticles(type) {
         return $(this).data('id');
     }).get();
 
-    // Отправляем один запрос с этими IDs
+    var idsString = ids.join(',');
     if (ids.length > 0) {
         $.ajax({
             url: "/api/websites/",
             type: 'GET',
             data: {
-                'ids[]': ids,
+                'ids': idsString,
                 'type': type // Добавили тип для параметров запроса
             },
             dataType: 'json',
@@ -114,5 +114,3 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementsByClassName("tablinks")[0].click();
     setInterval(setActiveTabUpdate, 15000);
 });
-//   updateArticles() 
-//   setInterval(updateArticles, 15000); // обновляем каждые 10 секунд

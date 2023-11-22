@@ -1,12 +1,16 @@
+import json
+
 from django.db.models import OuterRef, Exists
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
+
 from .models import Website, Country, Article, Word, Configuration, TrackedWord, TrackedWordMention
-from users.models import Tab
+from users.models import Tab, UserDevice
+
 from django.db.models import Q
 from django.db.models import Case, When, Value, CharField
 
@@ -14,6 +18,7 @@ from utils.date_helpers import apply_date_filter
 from utils.request_helpers import get_int_list_from_request
 from utils.query_helpers import build_search_query
 from utils.text_helpers import create_articles
+
 
 
 @login_required(login_url="/")
@@ -24,6 +29,8 @@ def website_list(request):
     websites = Website.objects.all().order_by('-last_scraped')
     countries = Country.objects.all().order_by('id')
     return render(request, 'main/website_list.html', {'websites': websites, 'countries': countries})
+
+
 
 
 @login_required(login_url="/")
@@ -63,6 +70,8 @@ def live_all(request):
             'word': tracked_word,
             'count': mentions_count
         })
+        
+    categories = Article.get_sorted_categories()
     return render(request, 'main/live.html', {'articles': None,
                                               'words': words[::-1],
                                               "tracked_word_with_counts": tracked_word_with_counts,
@@ -72,7 +81,8 @@ def live_all(request):
                                               'other_countries': other_countries,
                                               'favorite_sites': favorite_sites,
                                               'other_sites': other_sites,
-                                              'tracked_words': tracked_words
+                                              'tracked_words': tracked_words,
+                                              'categories': categories
                                               })
 
 
@@ -231,13 +241,11 @@ def api_article_list(request):
     API-точка, которая возвращает список статей для конкретного сайта по его ID.
     Главная страница HTML: website_list.html
     """
-    # articles = Article.objects.filter(website_id=website_id).order_by(
-    #     "-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
 
-    # articles = create_articles(articles)[::-1]
-    # return JsonResponse({'articles': list(articles)})
     type = request.GET.get('type')
-    ids = request.GET.getlist('ids[]')
+    ids = request.GET.getlist('ids')
+    ids = get_int_list_from_request(request, 'ids')
+
 
     all_articles = {}
     if type == 'Websites':
@@ -256,10 +264,7 @@ def api_article_list(request):
                 website__country__id=country_id
             ).order_by("-published_at"
                        ).values('website__country_id', 'id', 'title', 'title_translate', 'url', 'published_at')[:3]
-            # articles_list = []
-            # # for article in articles:
-            # #     article['id'] = article.pop('website__country_id')
-            # #     articles_list.append(article)
+
             all_articles[country_id] = create_articles(articles)[::-1]
     return JsonResponse({'websites': all_articles})
 
@@ -388,6 +393,15 @@ def articles_for_related_data(request, data_id, data_type):
             default=Value(None),
             output_field=CharField()
         )
+    ).annotate(
+        readable_category=Case(
+            *[
+                When(category=choice, then=Value(name))
+                for choice, name in Article.CategoryChoices.choices
+            ],
+            default=Value(None),
+            output_field=CharField()
+        )
     ).order_by("-published_at"
                ).values('id',
                         'title',
@@ -398,7 +412,8 @@ def articles_for_related_data(request, data_id, data_type):
                         'website__country__name',
                         'published_at',
                         'is_favorite',
-                        'task_status')[:count_filter]
+                        'task_status',
+                        'readable_category')[:count_filter]
 
     if len(articles) == 0:
         return JsonResponse({'error': 'Ничего не найдено'})
@@ -514,9 +529,10 @@ def test(request):
     live = request.GET.get('live')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    selected_categories = request.GET.get('categories')
+        
 
-    selected_countries = get_int_list_from_request(
-        request, 'selected_countries')
+    selected_countries = get_int_list_from_request(request, 'selected_countries')
     selected_websites = get_int_list_from_request(request, 'websites')
     selected_tracked_words = get_int_list_from_request(request, 'trackwords')
 
@@ -550,6 +566,10 @@ def test(request):
         articles = articles.filter(published_at__gte=start_date)
     if end_date:
         articles = articles.filter(published_at__lte=end_date)
+        
+    if selected_categories:
+        selected_categories = selected_categories.split(',')
+        articles = articles.filter(category__in=selected_categories)
 
     if only_favorites:
         articles = articles.filter(website__favorited_by=request.user)
@@ -575,6 +595,15 @@ def test(request):
             default=Value(None),
             output_field=CharField()
         )
+    ).annotate(
+        readable_category=Case(
+            *[
+                When(category=choice, then=Value(name))
+                for choice, name in Article.CategoryChoices.choices
+            ],
+            default=Value(None),
+            output_field=CharField()
+        )
     ).order_by("-published_at").values(
         'id',
         'title',
@@ -585,7 +614,8 @@ def test(request):
         'website__id',
         'website__country__name',
         'is_favorite',
-        'task_status'
+        'task_status',
+        'readable_category'
     )[:100]
 
     articles = create_articles(articles)[::-1]

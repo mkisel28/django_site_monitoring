@@ -55,11 +55,15 @@ def get_resource(url):
     headers = get_headers()
     try:
         response = requests.get(url, headers=headers, timeout=15)
-    except (requests.exceptions.ConnectTimeout, requests.exceptions.Timeout):
+    except (requests.exceptions.ConnectTimeout, requests.exceptions.Timeout, requests.exceptions.RequestException):
         try:
             response = requests.get(url, timeout=10)
         except (requests.exceptions.ConnectTimeout, requests.exceptions.Timeout):
             raise Exception("Timed out")
+    except Exception as e:
+        logger.exception(f"Error getting resource: {e}")
+        raise Exception(f"Error getting resource: {e}")
+        
     response.raise_for_status() 
     return response.text
 

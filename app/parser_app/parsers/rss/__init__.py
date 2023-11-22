@@ -42,32 +42,34 @@ def parse_atom(root):
     namespaces = {'atom': 'http://www.w3.org/2005/Atom'}
     articles = []
 
-    for entry in root.findall('atom:entry', namespaces):
-        try:
+    try:
+        for entry in root.findall('atom:entry', namespaces):
             title = entry.find('atom:title', namespaces).text
             article_url = entry.find("atom:link[@rel='alternate']", namespaces).get('href')
             published_at = entry.find('atom:published', namespaces).text
             append_article(articles, title, article_url, published_at)
 
-        except AttributeError:
-            pass
-        except Exception as e:
-            raise(e)
+    except AttributeError: #так надо
+        pass
+    except Exception as e:
+        logger.error(f"Error parsing atom: {e}")
+        return None
 
     return articles[:100] if articles else None
 
 def parse_rss(items):
     articles = []
-    for item in items:
-        try:
+    try:
+        for item in items:
             title = item.find('./title').text
             article_url = item.find('./link').text
             published_at = item.find('./pubDate').text
             append_article(articles, title, article_url, published_at)
-        except AttributeError:
-            pass
-        except Exception as e:
-            raise(e)
+    except AttributeError:
+        pass
+    except Exception as e:
+        logger.error(f"Error parsing atom: {e}")
+        return None
     return articles[:100]
 
 
@@ -77,8 +79,10 @@ def parse(sitemap_url, response):
         items = root.findall('.//item')
         if not items:
             items = parse_atom(root)
-            return items
-        return parse_rss(items)
+            if items:
+                return items
+        else:
+            return parse_rss(items)
     except ET.ParseError:
         return feed_parse(sitemap_url)
     except Exception as e:

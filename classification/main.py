@@ -6,7 +6,7 @@ conn_params = {
     'dbname': 'website_parsing',
     'user': 'postgres',
     'password': 'Maksim2001',
-    'host': 'db '
+    'host': 'db'
 }
 
 

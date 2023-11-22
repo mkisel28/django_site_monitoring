@@ -3,8 +3,11 @@ import logging
 import time
 
 from deep_translator import GoogleTranslator
-from deep_translator.exceptions import TranslationNotFound
-
+from deep_translator.exceptions import (
+    RequestError,
+    TooManyRequests,
+    TranslationNotFound,
+)
 
 logger = logging.getLogger("utils")
 
@@ -26,12 +29,17 @@ def translate_text_to_ru(from_lang: str, to_translate: str) -> str:
             translated_text = GoogleTranslator(source=from_lang, target="ru").translate(
                 to_translate
             )
-            logger.info(f"Попытка перевода №{i+1}. успешно.")
-
+            # logger.info(f"Попытка перевода №{i+1}. успешно.")
             return translated_text
         except TranslationNotFound:
             logger.error(f"Попытка перевода №{i+1}. Ошибка перевода.")
             time.sleep(1)
+        except RequestError:
+            logger.warning(f"Попытка перевода №{i+1}. Ошибка запроса.")
+            time.sleep(3)
+        except TooManyRequests:
+            logger.warning(f"Попытка перевода №{i+1}. Слишком много запросов.")
+            time.sleep(10)
     raise TranslationNotFound(f"Не удалось перевести после {MAX_RETRIES} попыток")
 
 
@@ -53,13 +61,19 @@ def translate_text_to_eng(from_lang: str, to_translate: str) -> str:
             translated_text = GoogleTranslator(source=from_lang.lower(), target="en").translate(
                 to_translate
             )
-            logger.info(f"Попытка перевода №{i+1}. успешно.")
-
+            # logger.info(f"Попытка перевода №{i+1}. успешно.")
             return translated_text
         except TranslationNotFound:
             logger.error(f"Попытка перевода №{i+1}. Ошибка перевода.")
             time.sleep(1)
+        except RequestError:
+            logger.warning(f"Попытка перевода №{i+1}. Ошибка запроса.")
+            time.sleep(3)
+        except TooManyRequests:
+            logger.warning(f"Попытка перевода №{i+1}. Слишком много запросов.")
+            time.sleep(10)
     raise TranslationNotFound(f"Не удалось перевести после {MAX_RETRIES} попыток")
+
 
 def check_and_send_notifications(user, article, keywords_list):
     """

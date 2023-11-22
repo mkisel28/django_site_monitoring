@@ -39,10 +39,9 @@ urlpatterns = [
     path('api/tasks/update/' , views.api_task_update, name='api_task_update'),
     
     path('api/tasks/info/' , views.api_get_all_tasks, name='api_get_all_tasks'),
-    path('api/tasks/info/<int:task_id>/', views.api_task_info, name='api_task_info'),
+    path('api/tasks/info/<int:article_id>/', views.api_task_info, name='api_task_info'),
     
     
     
-    
-    path('api/taskstable/', views.api_tasks, name='api_tasks'),
+    path('api/finger/', views.finger, name='api_finger'),
 ]

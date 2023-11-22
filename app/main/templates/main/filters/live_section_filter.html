@@ -34,6 +34,7 @@
             left: 0;
             top: 0;
             height: 100%;
+            overflow: overlay;
             transform: translateX(-100%);
             /* Скрыть боковую панель за левой стороной экрана */
         }
@@ -62,6 +63,113 @@
     .aside-active {
         transform: translateX(0);
     }
+
+
+
+
+
+
+    .filters label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .more-filters button {
+        background-color: #f5f5f5;
+        border: 1px solid #ccc;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    
+    .more-filters button:hover {
+        background-color: #e9e9e9;
+    }
+    
+    .hidden-filters label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+
+
+
+
+
+
+
+
+    .grid-container {
+        display: grid;
+        /* grid-template-columns: repeat(auto-fit, 300px); */
+        /* grid-gap: 30px; */
+        /* padding: 20px; */
+        justify-items: center;
+        justify-content: start;
+        align-items: start;
+    }
+    .box {
+        padding: 2px;
+    }
+    .box .filters{
+        display: block;
+    }
+      .checkbox-rect {
+        padding-bottom: 10px;
+    }
+      
+      /* checkbox-rect */
+      .checkbox-rect input[type="checkbox"] {
+        display: none;
+      }
+      
+      .checkbox-rect input[type="checkbox"] + label {
+        display: block;
+        position: relative;
+        padding-left: 35px;
+        margin-bottom: 20px;
+        font: 14px/20px "Open Sans", Arial, sans-serif;
+        cursor: pointer;
+        user-select: none;
+      }
+      
+      .checkbox-rect input[type="checkbox"]:hover + label:hover {
+        color: rgb(23, 86, 228);
+      }
+      
+      .checkbox-rect input[type="checkbox"]:hover + label:before {
+        background: #50565a;
+        box-shadow: inset 0px 0px 0px 2px #f7f2f2;
+      }
+      
+      .checkbox-rect input[type="checkbox"] + label:last-child {
+        margin-bottom: 0;
+      }
+      
+      .checkbox-rect input[type="checkbox"] + label:before {
+        content: "";
+        display: block;
+        width: 1.4em;
+        height: 1.4em;
+        border: 1px solid #343a3f;
+        border-radius: 0.2em;
+        position: absolute;
+        left: 0;
+        top: 0;
+        transition: all 0.2s, background 0.2s ease-in-out;
+        background: #f3f3f3;
+      }
+      
+      .checkbox-rect input[type="checkbox"]:checked + label:before {
+        width: 1.3em;
+        height: 1.3em;
+        border-radius: 0.2em;
+        border: 2px solid #fff;
+        transform: rotate(90deg);
+        background: #000000;
+        box-shadow: 0 0 0 1px #000;
+      }
+
+
 </style>
 <aside class="sidebar">
     <button class="menu-close-aside" aria-label="Close navigation menu">✕</button>
@@ -131,10 +239,55 @@
             <input type="date" id="endDate">
         </div>
     </div>
+
+
+
+    <div class="grid-container">
+        <div class="box">
+            <div class="filters">
+                <div class="visible-filters">
+                    <!-- Пример первых 7 фильтров, добавленные динамически -->
+                    {% for value, name in categories %}
+                        {% if forloop.counter <= 7 %}
+                            <div class="checkbox-rect">
+                                <input type="checkbox" id="checkbox-rect{{ forloop.counter }}" name="category" value="{{ value }}">
+                                <label for="checkbox-rect{{ forloop.counter }}">{{ name }}</label>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="more-filters">
+                    <button id="toggleFilters">Больше рубрик</button>
+                    <div class="hidden-filters" style="display:none;">
+                        <!-- Пример оставшихся фильтров, добавленные динамически -->
+                        {% for value, name in categories %}
+                            {% if forloop.counter > 7 %}
+                                <div class="checkbox-rect">
+                                    <input type="checkbox" id="checkbox-rect{{ forloop.counter }}" name="category" value="{{ value }}">
+                                    <label for="checkbox-rect{{ forloop.counter }}">{{ name }}</label>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    // ДЛЯ ФИЛЬТРОВ ПО РУБРИКАМ
+    document.getElementById('toggleFilters').addEventListener('click', function() {
+        var hiddenFilters = document.querySelector('.hidden-filters');
+        hiddenFilters.style.display = hiddenFilters.style.display === 'none' ? 'block' : 'none';
+    });
+</script>
+
 </aside>
 
 
 <script>
+
+
+
     $(document).ready(function () {
         $('#tabsSelect').select2({
             placeholder: "Выберите вкладку",

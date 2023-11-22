@@ -26,19 +26,12 @@ def parse(base_url, sitemap_url):
         logger.error(f"Ошибка запроса к сайту: {sitemap_url} | {e}")
         return None
     
-    parsed_data = rss.parse(sitemap_url, response)
-
-    if not parsed_data:
-        parsed_data = sitemap.parse(sitemap_url, response)
-    
-    if not parsed_data:
+    try:
+        parsed_data = rss.parse(sitemap_url, response) or sitemap.parse(sitemap_url, response)
+    except Exception as e:
+        logger.error(f"Error during parsing data from {sitemap_url}: {e}")
         return None
-        parser = PARSERS().get(base_url)
-        if parser:
-            parsed_data = parser.parse(sitemap_url, response)
-        else: return None
 
     return parsed_data
-
 
 

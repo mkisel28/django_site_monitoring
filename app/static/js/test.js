@@ -53,13 +53,18 @@ $(document).ready(function () {
                 <div class="website-url highlight ">
                     <div class="icons">${favoriteIcon} ${taskIcon}</div>
                     <div class="article-info">
-                        <div class="country">${article.website__country__name}</div>
+                        <div class="category">
+                            <span>${article.readable_category}</span>
+                        </div>
                         <div class="article-title">
                             <a href="${article.url}">${article.title}</a>
                         </div>
                         <div class="article-date">
-                            <span class="publish-date">${formattedDate}</span>
-                            <span class="publish-date">${article.website__name}</span>
+                            <div>
+                                <span class="publish-date">${formattedDate}</span>
+                                <span class="publish-date">${article.website__name}</span>
+                            </div>                  
+                            <div class="country">${article.website__country__name}</div>      
                         </div>
                     </div>
                 </div>
@@ -82,11 +87,13 @@ $(document).ready(function () {
         });
     }
     // обновление статьи при изменении даты, страны, сайта
-    $('#startDate, #endDate, #countriesSelect, #websitesSelect, #trackwordSelect').on('change', function () {
+    $('#startDate, #endDate, #countriesSelect, #websitesSelect, #trackwordSelect, .filters input[type="checkbox"]').on('change', function () {
         if (!window.isUpdatingArticles) {
             updateArticlesWithClear();
         }
     });
+
+
 
     function showTaskDialogForAddTask(articleId) {
         Swal.fire({
@@ -120,8 +127,7 @@ $(document).ready(function () {
     
     function addTask(articleId, status, priority) {
         var csrftoken = getCookie('csrftoken');
-        console.log(csrftoken)
-        console.log(articleId)
+
 
         $.ajax({
             url: '/api/tasks/create/', 
@@ -246,7 +252,7 @@ $(document).ready(function () {
 
     function updateArticleHighlight(articleId, status) {
         var $article = $(`li[data-id="${articleId}"]`);
-        $article.removeClass('task-pending task-in-progresss task-completed');
+        $article.removeClass('task-pending task-in-progress task-completed');
 
         var highlightClass = '';
         if (status === 'pending') {
@@ -300,6 +306,14 @@ $(document).ready(function () {
         var selectedWebsites = $('#websitesSelect').val();
         var selectedTrackwords = $('#trackwordSelect').val();
 
+        var selectedCategories = [];
+        $('.filters input[type="checkbox"]:checked').each(function() {
+            selectedCategories.push($(this).val());
+        });
+        // Добавление чекбоксов рубрик
+        if (selectedCategories.length > 0) {
+            updateUrl = addParameterToURL(updateUrl, "categories", selectedCategories.join(','));
+        }
         // Добавление фильтра startDate
         if (startDate) {
             updateUrl = addParameterToURL(updateUrl, "start_date", startDate);

@@ -4,7 +4,11 @@ from django.contrib.auth.models import User
 
 from main.models import Country, TrackedWord, Website, Article
 
-# Create your models here.
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
+from django.contrib.sessions.models import Session
+
+
 class Tab(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tabs", verbose_name="Пользователь")
     name = models.CharField(max_length=255, verbose_name="Название вкладки")
@@ -123,3 +127,36 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.task} - {self.created_at}"
+    
+
+
+from django.conf import settings
+
+class UserDevice(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    device_info = models.CharField(max_length=256, null=True, blank=True)
+    session_key = models.CharField(max_length=256, null=True, blank=True)   
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.device_info}"
+    
+    
+
+# @receiver(user_logged_in)
+# def on_user_logged_in(sender, request, user, **kwargs):
+#     device_info = request.session.session_key
+
+#     # Удаление старой сессии, если есть 3 активные сессии
+#     user_sessions = UserDevice.objects.filter(user=user)
+#     if user_sessions.count() >= 3:
+#         oldest_session = user_sessions.first()
+#         UserDevice.objects.filter(device_info=oldest_session.device_info).delete()
+#         oldest_session.delete()
+#         Session.objects.filter(session_key=oldest_session.device_info).delete()
+
+#     # Добавление новой сессии
+#     UserDevice.objects.create(user=user, device_info=device_info)

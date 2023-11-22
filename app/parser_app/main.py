@@ -4,7 +4,7 @@ from pathlib import Path
  
 from django.conf import settings
 import django
-
+import requests
 import environ
 
 
@@ -18,16 +18,13 @@ settings.configure(
         'NAME': "website_parsing",
         'USER': "postgres",
         'PASSWORD': "Maksim2001",
-        'HOST': "db",
-        'PORT': '5432',
+        'HOST': "localhost",
+        'PORT': 'db',
         }
     },
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
     
 ],
     LOGGING = {
@@ -48,6 +45,13 @@ INSTALLED_APPS = [
                 'level': 'INFO',
                 'class': 'logging.FileHandler',
                 'filename': 'debug1.log',
+                'encoding': 'utf-8', 
+                "formatter": "verbose",
+            },
+            'top_words_logger_file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': 'top_words.log',
                 'encoding': 'utf-8', 
                 "formatter": "verbose",
             },
@@ -90,7 +94,12 @@ INSTALLED_APPS = [
                 'handlers': ['console', 'file', 'telegram_send'],
                 'level': 'INFO',
                 'propagate': True,
-        },
+            },
+            'top_words_logger': {
+                'handlers': ["console", "top_words_logger_file"],
+                'level': 'INFO',
+                'propagate': True,
+            },
         },
     },
 
@@ -103,6 +112,7 @@ INSTALLED_APPS = [
 django.setup()
 
 from controller import main, top_words
+from django.db.utils import DatabaseError
 
 import logging
 logger = logging.getLogger("telegram")
@@ -111,8 +121,17 @@ logger = logging.getLogger("telegram")
 while True:
     try:
         main()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Network error: {e}")
+    except DatabaseError as e:
+        logger.error(f"Database error: {e}")
+    except Exception as e:
+        logger.exception(f"Unhandled exception: {e}")
+    finally:
+        time.sleep(60)
+    
+    try:
         top_words()
     except Exception as e:
-        logger.exception(f"Error: {e}")
-        logger.critical(f"Error: {e}")
-    time.sleep(60)
+        logger.exception(f"Unhandled exception for top_words {e}")
+    

@@ -11,9 +11,13 @@
 
 
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.min.js"></script>
 
 
 
+    {% if user.is_authenticated %}
+    <script src="{% static 'js/keep-alive.js' %}"></script>
+    {%endif%}
 
 </head>
 <header>
