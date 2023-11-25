@@ -28,7 +28,7 @@ $(document).ready(function () {
 
     function addArticles($list, articles) {
         articles.forEach(function (article) {
-            var formattedDate = formatDateTime(article.published_at);
+            var formattedDate = formatDateTime(article.created_at);
 
 
             var favoriteIcon = article.is_favorite ?

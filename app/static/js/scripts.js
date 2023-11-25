@@ -66,7 +66,7 @@ function updateArticles(type) {
 function addArticles($list, articles) {
     // Добавляем статьи в начало списка
     articles.forEach(function (article) {
-        var formattedDate = formatDateTime(article.published_at);
+        var formattedDate = formatDateTime(article.created_at);
         var listItem = `
                     <li data-id="${article.id}" style="display: none;">
                         <div class="website-url highlight">

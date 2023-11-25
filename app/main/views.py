@@ -121,12 +121,12 @@ def search(request):
         selected_countries = ', '.join(
             [country_dict[code] for code in country_filters])
 
-        articles = articles.filter(website__country__code__in=country_filters).order_by("-published_at").values(
-            'id', 'title', 'title_translate', 'url', 'published_at', 'website__name', 'website__country__name')
+        articles = articles.filter(website__country__code__in=country_filters).order_by("-created_at").values(
+            'id', 'title', 'title_translate', 'url', 'published_at', 'created_at','website__name', 'website__country__name')
     else:
         selected_countries = None
-        articles = articles.order_by("-published_at").values('id', 'title', 'title_translate',
-                                                             'url', 'published_at', 'website__name', 'website__country__name')
+        articles = articles.order_by("-created_at").values('id', 'title', 'title_translate',
+                                                             'url', 'published_at', 'created_at', 'website__name', 'website__country__name')
     total_articles = len(articles)
 
     articles = create_articles(articles[:1000])
@@ -204,7 +204,7 @@ def website_articles(request, website_id):
     Отображает страницу со списком статей для конкретного сайта по его ID.
     """
     articles = Article.objects.filter(website_id=website_id).order_by(
-        "-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')
+        "-created_at").values('id', 'title', 'title_translate', 'url', 'published_at', 'created_at')
 
     articles = create_articles(articles)
     return render(request, 'main/article_list.html', {'articles': articles})
@@ -235,7 +235,7 @@ def api_article_list(request):
             articles = Article.objects.filter(
                 Q(website__user=None) | Q(website__user=request.user),
                 website_id=website_id
-            ).order_by("-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')[:3]
+            ).order_by("-created_at").values('id', 'title', 'title_translate', 'url', 'published_at', 'created_at')[:3]
             all_articles[website_id] = create_articles(articles)[::-1]
     elif type == 'Countries':
         for country_id in ids:
@@ -243,8 +243,8 @@ def api_article_list(request):
             articles = Article.objects.filter(
                 Q(website__user=None) | Q(website__user=request.user),
                 website__country__id=country_id
-            ).order_by("-published_at"
-                       ).values('website__country_id', 'id', 'title', 'title_translate', 'url', 'published_at')[:3]
+            ).order_by("-created_at"
+                       ).values('website__country_id', 'id', 'title', 'title_translate', 'url', 'published_at', 'created_at')[:3]
 
             all_articles[country_id] = create_articles(articles)[::-1]
     return JsonResponse({'websites': all_articles})
@@ -328,7 +328,7 @@ def articles_for_related_data(request, data_id, data_type):
             default=Value(None),
             output_field=CharField()
         )
-    ).order_by("-published_at"
+    ).order_by("-created_at"
                ).values('id',
                         'title',
                         'title_translate',
@@ -337,6 +337,7 @@ def articles_for_related_data(request, data_id, data_type):
                         'website__id',
                         'website__country__name',
                         'published_at',
+                        'created_at',
                         'is_favorite',
                         'task_status',
                         'readable_category')[:count_filter]
@@ -522,9 +523,9 @@ def test(request):
         )
     )
     if start_date:
-        articles = articles.filter(published_at__gte=start_date)
+        articles = articles.filter(created_at=start_date)
     if end_date:
-        articles = articles.filter(published_at__lte=end_date)
+        articles = articles.filter(created_at=end_date)
         
     if selected_categories:
         selected_categories = selected_categories.split(',')
@@ -563,12 +564,13 @@ def test(request):
             default=Value(None),
             output_field=CharField()
         )
-    ).order_by("-published_at").values(
+    ).order_by("-created_at").values(
         'id',
         'title',
         'title_translate',
         'url',
         'published_at',
+        'created_at',
         'website__name',
         'website__id',
         'website__country__name',

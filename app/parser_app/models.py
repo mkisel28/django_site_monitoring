@@ -109,6 +109,7 @@ class Article(models.Model):
     title = models.TextField(verbose_name="Название статьи")
     url = models.URLField(max_length=1000, unique=True, verbose_name="Ссылка на статью")
     published_at = models.DateTimeField(verbose_name="Дата публикации", db_index=True)
+    created_at = models.DateTimeField(verbose_name="Время добавления в БД", auto_now_add=True, db_index=True)
     title_translate = models.TextField(verbose_name="Перевод названия", blank=True, null=True)
     eng_title = models.TextField(verbose_name="Название статьи на английском", blank=True, null=True)
     normalized_title = models.TextField(verbose_name="Название статьи в начальной форме", blank=True, null=True)
@@ -207,7 +208,7 @@ class TrackedWord(models.Model):
         )
         # Создаем записи в TrackedWordMention для каждой статьи, содержащей это слово
         for article in articles_with_word:
-            TrackedWordMention.objects.get_or_create(word=self, article=article, mentioned_at= article.published_at)
+            TrackedWordMention.objects.get_or_create(word=self, article=article, mentioned_at= article.created_at)
 
 class TrackedWordMention(models.Model):
     word = models.ForeignKey(TrackedWord, on_delete=models.CASCADE, related_name="mentions")

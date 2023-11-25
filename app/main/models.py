@@ -107,6 +107,7 @@ class Article(models.Model):
     title = models.TextField(verbose_name="Название статьи")
     url = models.URLField(max_length=1000, unique=True, verbose_name="Ссылка на статью")
     published_at = models.DateTimeField(verbose_name="Дата публикации", db_index=True)
+    created_at = models.DateTimeField(verbose_name="Время добавления в БД", auto_now_add=True, db_index=True)
     title_translate = models.TextField(verbose_name="Перевод названия", blank=True, null=True)
     eng_title = models.TextField(verbose_name="Название статьи на английском", blank=True, null=True)
     normalized_title = models.TextField(verbose_name="Название статьи в начальной форме", blank=True, null=True)
@@ -118,38 +119,16 @@ class Article(models.Model):
     @classmethod
     def get_sorted_categories(cls):
         one_week_ago = timezone.now() - datetime.timedelta(weeks=3)
-        category_counts = cls.objects.filter(published_at__gte=one_week_ago).values('category').annotate(count=Count('category')).order_by('-count')
+        category_counts = cls.objects.filter(created_at__gte=one_week_ago).values('category').annotate(count=Count('category')).order_by('-count')
 
         sorted_categories = sorted(cls.CategoryChoices.choices, key=lambda x: next((item['count'] for item in category_counts if item['category'] == x[0]), 0), reverse=True)
 
         return sorted_categories
 
-    @classmethod
-    def get_annotated_articles(cls, user):
-        return cls.objects.annotate(
-            task_status=Case(
-                When(task__user=user, then='task__status'),
-                default=Value(None),
-                output_field=CharField()
-            )
-        ).annotate(
-            readable_category=Case(
-                *[
-                    When(category=choice, then=Value(name))
-                    for choice, name in cls.CategoryChoices.choices
-                ],
-                default=Value(None),
-                output_field=CharField()
-            )
-        ).order_by("-published_at").values(
-            'id', 'title', 'title_translate', 'url', 
-            'published_at', 'website__name', 'website__id', 
-            'website__country__name', 'is_favorite', 
-            'task_status', 'readable_category'
-        )[:100]
+
 
     @classmethod
-    def create(cls, website, title, url, published_at):
+    def create(cls, website: Website, title: str, url: str, published_at: datetime.datetime):
         # Проверяем, существует ли статья с таким URL
         if not cls.objects.filter(url=url).exists():
             article = cls(website=website, title=title,
@@ -227,7 +206,7 @@ class TrackedWord(models.Model):
         articles_with_word = get_articles_with_word(self.keyword, Article)
         # Создаем записи в TrackedWordMention для каждой статьи, содержащей это слово
         mentions_to_create = [
-            TrackedWordMention(word=self, article=article, mentioned_at=article.published_at)
+            TrackedWordMention(word=self, article=article, mentioned_at=article.created_at)
             for article in articles_with_word
             if not TrackedWordMention.objects.filter(word=self, article=article).exists()
         ]

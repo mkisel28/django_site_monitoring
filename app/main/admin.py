@@ -20,9 +20,9 @@ class WebsiteAdmin(admin.ModelAdmin):
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'website', "category", "eng_title",
-                    'published_at', 'url', 'display_country']
+                    'published_at', 'created_at', 'url', 'display_country']
     search_fields = ['title', 'title_translate', 'website__name']
-    list_filter = ['published_at', 'website', 'website__country']
+    list_filter = ['created_at', 'website', 'website__country']
     
     actions = ['clear_eng_title', 'clear_category', 'clear_all_categories', 'clear_all_eng_titles']
     

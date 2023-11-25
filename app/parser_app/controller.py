@@ -114,7 +114,7 @@ def top_words():
         TOP_COUNT = config.top_words_count
 
         one_hour_ago = timezone.now() - timedelta(hours=HOURS)
-        recent_articles = Article.objects.filter(published_at__gte=one_hour_ago)
+        recent_articles = Article.objects.filter(created_at__gte=one_hour_ago)
 
         all_words = [word for article in recent_articles if article.normalized_title
                      for word in article.normalized_title.split()]
