@@ -18,6 +18,8 @@
     </div>
 
     <div class="form-group">
+        <div id="alertPlaceholder" style=" text-align: center;"></div>
+
         <form id="registrationForm" method="post">
             {% csrf_token %}
             <div class="form-group1">
@@ -39,7 +41,6 @@
             <button type="submit">Зарегистрироваться</button>
 
         </form>
-        <div id="alertPlaceholder" style=" text-align: center;"></div>
 
     </div>
 
@@ -47,18 +48,16 @@
 </div>
 <style>
     #alertPlaceholder {
-        position: absolute;
-        top: 10px; /* Расположим немного ниже верхнего края формы */
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10;
+
         display: none;
     }
     
     .alert {
+        font-size: 13.1px;
+    font-weight: 600;
         padding: 10px;
         color: white;
-        border-radius: 5px;
+        border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .danger{
@@ -73,13 +72,13 @@
     function validatePassword(password) {
         var errors = [];
         if (password.length < 8) {
-            errors.push("Ваш пароль должен содержать не менее 8 символов."); 
+            errors.push("Пароль должен содержать не менее 8 символов."); 
         }
         if (password.search(/[a-z]/i) < 0) {
-            errors.push("Ваш пароль должен содержать хотя бы одну букву."); 
+            errors.push("Пароль должен содержать хотя бы одну букву."); 
         }
         if (password.search(/[0-9]/) < 0) {
-            errors.push("Ваш пароль должен содержать хотя бы одну цифру."); 
+            errors.push("Пароль должен содержать хотя бы одну цифру."); 
         }
         if (password.search(/[^a-zA-Z0-9!@#$%^&*]/) >= 0) {
             errors.push("Ваш пароль содержит недопустимые символы.");
@@ -114,10 +113,16 @@
                 password2: $('#confirmPassword').val()
             },
             success: function(response) {
-                showAlert('Регистрация прошла успешно!', 'success');
+                // showAlert('Регистрация прошла успешно!', 'success');
+                Swal.fire({
+                    icon: "success",
+                    title: "Регистрация прошла успешно!",
+                    showConfirmButton: false,
+                    timer: 1500
+                  });
             setTimeout(function() {
                     window.location.href = "{% url 'users:login' %}"; // перенаправление на страницу входа
-                }, 3000); // перенаправляем через 3 секунды
+                }, 1500); // перенаправляем через 3 секунды
 },
             error: function(xhr, status, error) {
                 var errors = JSON.parse(xhr.responseText).errors;
@@ -141,9 +146,9 @@
         alertPlaceholder.style.display = 'block'; // Показываем уведомление
     
         // Через 3 секунды скрываем уведомление
-        setTimeout(function() {
-            alertPlaceholder.style.display = 'none';
-        }, 3000);
+        //setTimeout(function() {
+        //    alertPlaceholder.style.display = 'none';
+        //}, 300000);
     }
     
     </script>

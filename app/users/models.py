@@ -10,32 +10,52 @@ from django.contrib.sessions.models import Session
 
 
 class Tab(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tabs", verbose_name="Пользователь")
-    name = models.CharField(max_length=255, verbose_name="Название вкладки")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="tabs", verbose_name="Пользователь"
+    )
+    name = models.CharField(max_length=255, verbose_name="Название набора фильтров")
+
     class Meta:
-      verbose_name = "Вкладка"
-      verbose_name_plural = "Вкладки"
-      
+        verbose_name = "Набор фильтров"
+        verbose_name_plural = "Наборы фильтров"
+
     def __str__(self):
         return self.name
+
     # Метод для добавления сайта в вкладку
     def add_website(self, website_id):
         website = get_object_or_404(Website, pk=website_id)
-        tab_website, created = TabWebsite.objects.get_or_create(tab=self, website=website)
+        tab_website, created = TabWebsite.objects.get_or_create(
+            tab=self, website=website
+        )
         return tab_website
 
     # Метод для добавления страны в вкладку
     def add_country(self, country_id):
         country = get_object_or_404(Country, pk=country_id)
-        tab_country, created = TabCountry.objects.get_or_create(tab=self, country=country)
+        tab_country, created = TabCountry.objects.get_or_create(
+            tab=self, country=country
+        )
         return tab_country
 
     # Метод для добавления отслеживаемого слова в вкладку
     def add_tracked_word(self, tracked_word_id):
         tracked_word = get_object_or_404(TrackedWord, pk=tracked_word_id)
-        tab_tracked_word, created = TabTrackedWord.objects.get_or_create(tab=self, tracked_word=tracked_word)
+        tab_tracked_word, created = TabTrackedWord.objects.get_or_create(
+            tab=self, tracked_word=tracked_word
+        )
         return tab_tracked_word
-    
+
+    def add_category(self, category):
+        try:
+            category = Article.CategoryChoices(category)
+        except ValueError:
+            raise ValueError("Неверное значение категории")
+        tab_category, created = TabCategory.objects.get_or_create(
+            tab=self, category=category
+        )
+        return tab_category
+
     # Получить все сайты, связанные с этой вкладкой
     def get_websites(self):
         return [tab_website.website for tab_website in self.tab_websites.all()]
@@ -46,105 +66,148 @@ class Tab(models.Model):
 
     # Получить все отслеживаемые слова, связанные с этой вкладкой
     def get_tracked_words(self):
-        return [tab_tracked_word.tracked_word for tab_tracked_word in self.tab_tracked_words.all()]
+        return [
+            tab_tracked_word.tracked_word
+            for tab_tracked_word in self.tab_tracked_words.all()
+        ]
+
+    def get_categories(self):
+        return [tab_category.category for tab_category in self.tab_categories.all()]
+
 
 class TabWebsite(models.Model):
     tab = models.ForeignKey(Tab, on_delete=models.CASCADE, related_name="tab_websites")
-    website = models.ForeignKey(Website, on_delete=models.CASCADE, related_name="website_tabs")
-    
+    website = models.ForeignKey(
+        Website, on_delete=models.CASCADE, related_name="website_tabs"
+    )
+
     class Meta:
-      verbose_name = "Сайт во вкладке"
-      verbose_name_plural = "Сайты во вкладке"
-      
+        verbose_name = "Сайт в наборе фильтров"
+        verbose_name_plural = "Сайты в наборе фильтров"
+
     def __str__(self):
         return self.website.name
 
+
 class TabCountry(models.Model):
     tab = models.ForeignKey(Tab, on_delete=models.CASCADE, related_name="tab_countries")
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="country_tabs")
-    
+    country = models.ForeignKey(
+        Country, on_delete=models.CASCADE, related_name="country_tabs"
+    )
+
     class Meta:
-      verbose_name = "Страна во вкладке"
-      verbose_name_plural = "Страны во вкладке"
-    
+        verbose_name = "Страна в наборе фильтров"
+        verbose_name_plural = "Страны в наборе фильтров"
+
     def __str__(self):
         return self.country.name
 
+
 class TabTrackedWord(models.Model):
-    tab = models.ForeignKey(Tab, on_delete=models.CASCADE, related_name="tab_tracked_words")
-    tracked_word = models.ForeignKey(TrackedWord, on_delete=models.CASCADE, related_name="tracked_word_tabs")
-    
+    tab = models.ForeignKey(
+        Tab, on_delete=models.CASCADE, related_name="tab_tracked_words"
+    )
+    tracked_word = models.ForeignKey(
+        TrackedWord, on_delete=models.CASCADE, related_name="tracked_word_tabs"
+    )
+
     class Meta:
-      verbose_name = "Отслеживаемое слово во вкладке"
-      verbose_name_plural = "Отслеживаемые слова во вкладке"
-    
+        verbose_name = "Отслеживаемое слово в наборе фильтров"
+        verbose_name_plural = "Отслеживаемые слова в наборе фильтров"
+
     def __str__(self):
         return self.tracked_word.keyword
 
 
-class Task(models.Model):
-    class TaskStatus(models.TextChoices):
-        PENDING = 'pending', 'Отложено'
-        IN_PROGRESS = 'in_progress', 'В Процессе'
-        COMPLETED = 'completed', 'Отработано'
-
-    class Priority(models.IntegerChoices):
-        LOW = 1, 'Низкий'
-        MEDIUM = 2, 'Средний'
-        HIGH = 3, 'Высокий'
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks', verbose_name='Пользователь')
-    article = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Статья')
-    status = models.CharField(
-        max_length=20, 
-        choices=TaskStatus.choices, 
-        default=TaskStatus.PENDING, 
-        verbose_name='Статус'
+class TabCategory(models.Model):
+    tab = models.ForeignKey(
+        Tab, on_delete=models.CASCADE, related_name="tab_categories"
     )
-    priority = models.IntegerField(
-        choices=Priority.choices, 
-        default=Priority.MEDIUM, 
-        verbose_name='Приоритет')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    category = models.CharField(
+        max_length=50, choices=Article.CategoryChoices.choices, verbose_name="Категория"
+    )
 
     class Meta:
-        verbose_name = 'Задача'
-        verbose_name_plural = 'Задачи'
+        verbose_name = "Категория в наборе фильтров"
+        verbose_name_plural = "Категории в наборе фильтров"
+
+    def __str__(self):
+        return f"{self.tab.name} - {self.get_category_display()}"
+
+
+class Task(models.Model):
+    class TaskStatus(models.TextChoices):
+        PENDING = "pending", "Отложено"
+        IN_PROGRESS = "in_progress", "В Процессе"
+        COMPLETED = "completed", "Отработано"
+
+    class Priority(models.IntegerChoices):
+        LOW = 1, "Низкий"
+        MEDIUM = 2, "Средний"
+        HIGH = 3, "Высокий"
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="tasks",
+        verbose_name="Пользователь",
+    )
+    article = models.ForeignKey(
+        Article, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Статья"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=TaskStatus.choices,
+        default=TaskStatus.PENDING,
+        verbose_name="Статус",
+    )
+    priority = models.IntegerField(
+        choices=Priority.choices, default=Priority.MEDIUM, verbose_name="Приоритет"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    class Meta:
+        verbose_name = "Задача"
+        verbose_name_plural = "Задачи"
 
     def __str__(self):
         return f"{self.user.username} - {self.article.title} - {self.get_status_display()} - {self.get_priority_display()}"
 
+
 class Comment(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments', verbose_name='Задача')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
-    text = models.TextField(verbose_name='Текст комментария')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name="comments", verbose_name="Задача"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    text = models.TextField(verbose_name="Текст комментария")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     class Meta:
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
 
     def __str__(self):
         return f"{self.user.username} - {self.task} - {self.created_at}"
-    
 
 
 from django.conf import settings
 
+
 class UserDevice(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     device_info = models.CharField(max_length=256, null=True, blank=True)
-    session_key = models.CharField(max_length=256, null=True, blank=True)   
+    session_key = models.CharField(max_length=256, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['created_at']
+        ordering = ["created_at"]
 
     def __str__(self):
         return f"{self.user.username} - {self.device_info}"
-    
-    
+
 
 # @receiver(user_logged_in)
 # def on_user_logged_in(sender, request, user, **kwargs):

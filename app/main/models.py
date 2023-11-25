@@ -10,7 +10,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from utils.query_helpers import get_articles_with_word
-from django.db.models import Count
+from django.db.models import Case, When, Value, CharField, Count
+
 import datetime
 
 
@@ -122,6 +123,30 @@ class Article(models.Model):
         sorted_categories = sorted(cls.CategoryChoices.choices, key=lambda x: next((item['count'] for item in category_counts if item['category'] == x[0]), 0), reverse=True)
 
         return sorted_categories
+
+    @classmethod
+    def get_annotated_articles(cls, user):
+        return cls.objects.annotate(
+            task_status=Case(
+                When(task__user=user, then='task__status'),
+                default=Value(None),
+                output_field=CharField()
+            )
+        ).annotate(
+            readable_category=Case(
+                *[
+                    When(category=choice, then=Value(name))
+                    for choice, name in cls.CategoryChoices.choices
+                ],
+                default=Value(None),
+                output_field=CharField()
+            )
+        ).order_by("-published_at").values(
+            'id', 'title', 'title_translate', 'url', 
+            'published_at', 'website__name', 'website__id', 
+            'website__country__name', 'is_favorite', 
+            'task_status', 'readable_category'
+        )[:100]
 
     @classmethod
     def create(cls, website, title, url, published_at):

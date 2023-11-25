@@ -47,7 +47,7 @@
 
 <div class="card mt-4">
     <div class="card-header cardToggle">
-        <h3>Управление вкладками</h3>
+        <h3>Управление наборами фильтров</h3>
         <span class="float-right toggleText">Свернуть &#9650;</span>
     </div>
 
@@ -56,7 +56,7 @@
             <form id="create-tab-form" method="post" action="">
                 {% csrf_token %}
                 <div>
-                    <label for="tab-name">Название вкладки:</label>
+                    <label for="tab-name">Название для набора вкладок:</label>
                     <input type="text" id="tab-name" name="tab_name" required>
                 </div>
                 <div id="websites-selector">
@@ -83,11 +83,11 @@
 
 
                     <div class="create-tab">
-                        <h2>Создать новую вкладку</h2>
+                        <h2>Создать новый набор фильтров</h2>
                         <form id="create-tab-form" method="post" action="">
                             {% csrf_token %}
                             <div>
-                                <label for="tab-name">Название вкладки:</label>
+                                <label for="tab-name">Название набора:</label>
                                 <input type="text" id="tab-name" name="tab_name" required>
                             </div>
                             <div id="websites-selector">
@@ -125,7 +125,7 @@
                                 </select>
                             </div>
                             <div>
-                                <button type="submit">Создать вкладку</button>
+                                <button type="submit">Создать набор</button>
                             </div>
                         </form>
                     </div>
@@ -169,11 +169,11 @@
                     xhr.setRequestHeader("X-CSRFToken", csrftoken);
                 },
                 success: function (response) {
-                    console.log('Вкладка создана: ', response);
+                    console.log('Набор создан: ', response);
                     // Обработка успешного ответа (например, обновление интерфейса)
                 },
                 error: function (error) {
-                    console.error('Ошибка при создании вкладки: ', error);
+                    console.error('Ошибка при создании набора вкладок: ', error);
                     // Обработка ошибки
                 }
             });

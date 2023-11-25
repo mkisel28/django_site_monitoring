@@ -32,8 +32,8 @@ $(document).ready(function () {
 
 
             var favoriteIcon = article.is_favorite ?
-                `<a href="#" class="toggle-favorite" data-action="/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
-                `<a href="#" class="toggle-favorite" data-action="/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
+                `<a href="#" class="toggle-favorite" data-action="/api/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
+                `<a href="#" class="toggle-favorite" data-action="/api/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
             
             var taskIcon = article.task_status ?
                 `<a href="#" class="toggle-task" data-action="/update_task/${article.id}/"><i class="fas fa-tasks" style="color: #005eff;"></i></a>` :
@@ -87,7 +87,7 @@ $(document).ready(function () {
         });
     }
     // обновление статьи при изменении даты, страны, сайта
-    $('#startDate, #endDate, #countriesSelect, #websitesSelect, #trackwordSelect, .filters input[type="checkbox"]').on('change', function () {
+    $('#startDate, #endDate, #countriesSelect, #websitesSelect, #trackwordSelect, #excludedCountriesSelect, #excludedWebsitesSelect, #excludedTrackwordSelect, .filters input[type="checkbox"]').on('change', function () {
         if (!window.isUpdatingArticles) {
             updateArticlesWithClear();
         }
@@ -302,6 +302,7 @@ $(document).ready(function () {
 
         var startDate = $('#startDate').val();
         var endDate = $('#endDate').val();
+        // Фильтры для Live Tracking (Добавить фильтры)
         var selectedCountries = $('#countriesSelect').val();
         var selectedWebsites = $('#websitesSelect').val();
         var selectedTrackwords = $('#trackwordSelect').val();
@@ -310,6 +311,12 @@ $(document).ready(function () {
         $('.filters input[type="checkbox"]:checked').each(function() {
             selectedCategories.push($(this).val());
         });
+
+        //Исключение из фильтрации для Live Tracking
+        var excludedCountriesSelect = $('#excludedCountriesSelect').val();
+        var excludedWebsitesSelect = $('#excludedWebsitesSelect').val();
+        var excludedTrackwordSelect = $('#excludedTrackwordSelect').val();
+
         // Добавление чекбоксов рубрик
         if (selectedCategories.length > 0) {
             updateUrl = addParameterToURL(updateUrl, "categories", selectedCategories.join(','));
@@ -355,11 +362,30 @@ $(document).ready(function () {
             updateUrl = addParameterToURL(updateUrl, "trackwords", selectedTrackwords.join(','));
         }
 
+        // Добавление фильтра excludedCountriesSelect
+        if (excludedCountriesSelect && excludedCountriesSelect.length > 0) {
+            updateUrl = addParameterToURL(updateUrl, "excluded_countries", excludedCountriesSelect.join(','));
+        }
+
+        // Добавление фильтра excludedWebsitesSelect
+        if (excludedWebsitesSelect && excludedWebsitesSelect.length > 0) {
+            updateUrl = addParameterToURL(updateUrl, "excluded_websites", excludedWebsitesSelect.join(','));
+        }
+
+        // Добавление фильтра excludedTrackwordSelect
+        if (excludedTrackwordSelect && excludedTrackwordSelect.length > 0) {
+            updateUrl = addParameterToURL(updateUrl, "excluded_trackwords", excludedTrackwordSelect.join(','));
+        }
+        
         $.ajax({
             url: updateUrl,
             type: 'GET',
             dataType: 'json',
             success: function (data) {
+                if (!data.articles || data.articles.length === 0) {
+                    Swal.fire('Ничего не найдено.', 'Проверьте фильтры.', 'error'); // Вывод сообщения об отсутствии статей
+                    return; 
+                }
                 var currentIds = $list.find('li').map(function () {
                     return parseInt($(this).data('id'));
                 }).get();
@@ -440,14 +466,18 @@ $(document).ready(function () {
     ////////////////////////////................................////////////////////////////
 
 
-    // Обновление  фильтров в select при выборе вкладки в select через AJAX
+    // Обновление  фильтров в select при выборе набора фильтров в select через AJAX
     $('#tabsSelect').on('change', function () {
         var tabId = $(this).val();
 
         // Если вкладка не выбрана, очищаем поля и выходим
         if (!tabId) {
+            window.isUpdatingArticles = true;
             $('#countriesSelect').val(null).trigger('change');
             $('#websitesSelect').val(null).trigger('change');
+            $('#trackwordSelect').val(null).trigger('change');
+            window.isUpdatingArticles = false;
+            updateArticlesWithClear();
             return;
         }
         window.isUpdatingArticles = true;
@@ -475,7 +505,7 @@ $(document).ready(function () {
             },
             error: function (xhr, status, error) {
                 // Обработка ошибок
-                console.error("Ошибка при получении данных вкладки: ", status, error);
+                console.error("Ошибка при получении данных из набора фильтров: ", status, error);
                 window.isUpdatingArticles = false;
             }
         });

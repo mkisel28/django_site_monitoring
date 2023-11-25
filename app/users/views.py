@@ -163,7 +163,8 @@ def dashboard_collection(request):
     countries = Country.objects.all()
     websites = Website.objects.filter(Q(user=request.user) | Q(user=None))
     my_tabs = Tab.objects.filter(user=request.user)
-
+    
+    all_categories = Article.get_sorted_categories()
     all_websites = websites
     all_countries = countries
     all_tracked_words = TrackedWord.objects.filter(user=request.user)
@@ -178,6 +179,7 @@ def dashboard_collection(request):
             "all_websites": all_websites,
             "all_countries": all_countries,
             "all_tracked_words": all_tracked_words,
+            "all_categories": all_categories,
         },
     )
 
@@ -185,7 +187,7 @@ def dashboard_collection(request):
 def dashboard_sites(request):
     return render(request, "users/dashboard_sites.html")
 
-
+#НЕ ИСПОЛЬЗУЕТСЯ  В ПОЛНОМ ВИДЕ. РАБОТАЕТ ТОЛЬКО ДЛЯ NAME
 @login_required(login_url="/")
 def api_manage_tab(request):
     if request.method == "POST":
@@ -200,7 +202,7 @@ def api_manage_tab(request):
         for tracked_word_id in data.get("tracked_words", []):
             tab.add_tracked_word(tracked_word_id)
         return JsonResponse(
-            {"status": "success", "message": "Вкладка успешно создана."}
+            {"status": "success", "message": "Набор успешно создан."}
         )
 
 
@@ -340,11 +342,11 @@ def update_tab(request):
     try:
         data = request.POST
         tab_id = data.get("tab_id")
-
         try:
             selected_websites = list(map(int, data.getlist("websites[]")))
             selected_countries = list(map(int, data.getlist("countries[]")))
             selected_words = list(map(int, data.getlist("tracked_words[]")))
+            selected_categories = list(map(str, data.getlist("categories[]")))
         except ValueError:
             return JsonResponse({"message": "Неверный формат данных"}, status=400)
 
@@ -364,16 +366,20 @@ def update_tab(request):
         tab.tab_tracked_words.all().delete()
         for word_id in selected_words:
             tab.add_tracked_word(word_id)
+        
+        tab.tab_categories.all().delete()
+        for category in selected_categories:
+            tab.add_category(category)
         tab.save()
 
         return JsonResponse(
-            {"message": "Данные вкладки успешно обновлены."}, status=200
+            {"message": "Данные набора фильтров успешно обновлены."}, status=200
         )
 
     except Tab.DoesNotExist:
-        return JsonResponse({"error": "Вкладка не найдена."}, status=404)
+        return JsonResponse({"message": "Вкладка не найдена."}, status=404)
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"message": str(e)}, status=500)
 
 
 

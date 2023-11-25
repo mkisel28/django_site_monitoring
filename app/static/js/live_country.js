@@ -14,8 +14,8 @@ $(document).ready(function () {
             var formattedDate = formatDateTime(article.published_at);
 
             var favoriteIcon = article.is_favorite ?
-                `<a href="#" class="toggle-favorite" data-action="/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
-                `<a href="#" class="toggle-favorite" data-action="/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
+                `<a href="#" class="toggle-favorite" data-action="/api/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
+                `<a href="#" class="toggle-favorite" data-action="/api/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
 
             var listItem = `
             <li data-id="${article.id}">

@@ -18,8 +18,8 @@ settings.configure(
         'NAME': "website_parsing",
         'USER': "postgres",
         'PASSWORD': "Maksim2001",
-        'HOST': "localhost",
-        'PORT': 'db',
+        'HOST': "db",
+        'PORT': '5432',
         }
     },
 INSTALLED_APPS = [

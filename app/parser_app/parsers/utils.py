@@ -22,9 +22,7 @@ def format_date(published_at_str, website_id):
     formats = [
         '%a, %d %b %Y %H:%M:%S %z',   # 'Mon, 23 Oct 2023 19:07:17 +0300'
         '%d %b %Y %H:%M:%S %z',       # '23 Oct 2023 18:52:33 +0330'
-        '%Y-%m-%dT%H:%M:%S%z',        # '2023-10-23T19:07:17+0300'
-        '%Y-%m-%dT%H:%M:%S%z',        # '2023-10-23T19:07:17+03:00'
-        # Добавьте здесь другие форматы, которые вам нужны
+        '%Y-%m-%dT%H:%M:%S%z',        # '2023-10-23T19:07:17+0300'  '2023-10-23T19:07:17+03:00'
     ]
 
     for fmt in formats:
@@ -41,13 +39,13 @@ def format_date(published_at_str, website_id):
         tuple_time = parsedate_tz(published_at_str)
         if tuple_time is not None:
             dt = datetime.fromtimestamp(mktime_tz(tuple_time), ZoneInfo('UTC'))
-            if website_id in [32, 33]:
+            if website_id in [32, 33]: # Сайты с неправильным временем
                 dt -= timedelta(hours=3)
             return dt
     except Exception:
         pass
 
-    # Если все попытки неудачны, возвращаем None или можно выбросить исключение
+    # Если все попытки неудачны, возвращаем исходную строку
     return published_at_str
 
 

@@ -25,7 +25,7 @@
       <div class="my-sites">
         <div class="title">
           <i class="uil uil-sitemap"></i>
-          <span class="text">Мои вкладки</span>
+          <span class="text">Наборы фильтров</span>
         </div>
       </div>
 
@@ -66,9 +66,20 @@
               <label>Отслеживаемые слова:</label>
               <select class="form-control select2 word-select" multiple="multiple">
                 {% for tracked_word in all_tracked_words %}
-                <option value="{{ tracked_word.id }}" {% if tracked_word in tab.get_tracked_words%} selected="selected"
+                <option value="{{ tracked_word.id }}" {% if tracked_word in tab.get_tracked_words %} selected="selected"
                   {% endif %}>
                   {{ tracked_word.keyword }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Категории:</label>
+              <select class="form-control select2 category-select" multiple="multiple">
+                {% for category in all_categories %}
+                <option value="{{ category.0 }}" {% if category.0 in tab.get_categories %} selected="selected"
+                  {% endif %}>
+                  {{ category.1 }}
                 </option>
                 {% endfor %}
               </select>
@@ -83,7 +94,7 @@
 
       <div class="title">
         <i class="uil uil-sitemap"></i>
-        <span class="text">Создать вкладку</span>
+        <span class="text">Создать набор фильтров</span>
       </div>
       {% include "users/module/tabs_form.html" %}
 
@@ -176,6 +187,7 @@ sidebarToggle.addEventListener("click", () => {
       var selectedWebsites = listItem.find('.website-select').val();
       var selectedCountries = listItem.find('.country-select').val();
       var selectedWords = listItem.find('.word-select').val();
+      var selectedCategories = listItem.find('.category-select').val();
       var csrftoken = $("[name=csrfmiddlewaretoken]").val();
 
       var details = listItem.find('.tab-details');
@@ -183,7 +195,7 @@ sidebarToggle.addEventListener("click", () => {
       // Скрыть 'tab-details'
 
       $.ajax({
-        url: '/api/update-tab/', // URL для обновления вкладки
+        url: '/api/update-tab/', // URL для обновления набора
         type: 'POST',
         beforeSend: function (xhr) {
           xhr.setRequestHeader("X-CSRFToken", csrftoken);
@@ -192,16 +204,17 @@ sidebarToggle.addEventListener("click", () => {
           'tab_id': tabId,
           'websites': selectedWebsites,
           'countries': selectedCountries,
-          'tracked_words': selectedWords
+          'tracked_words': selectedWords,
+          'categories': selectedCategories,
         },
         success: function (response) {
           // $('#notificationModal .modal-body').html('<div class="checkmark"></div>Данные успешно обновлены!');
           // $('#notificationModal').modal('show');
           Swal.fire({
             title: 'Отлично',
-            text: 'Данные обновленны',
+            text: response.message,
             icon: 'success',
-            confirmButtonText: 'Закрыть'
+            confirmButtonText: 'Закрыть',
           })
           details.toggle();
           viewDetailsButton.text('Посмотреть');
@@ -212,9 +225,11 @@ sidebarToggle.addEventListener("click", () => {
           //  $('#notificationModal').modal('show');
           Swal.fire({
             title: 'Ууупс',
-            text: 'Что-то пошло не так',
+            text: 'Что-то пошло не так.',
             icon: 'error',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'Закрыть',
+            footer: response.responseJSON.message
+
           })
         }
       });

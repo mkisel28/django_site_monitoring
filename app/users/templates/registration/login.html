@@ -18,14 +18,11 @@
 
     </div>
 
-    {% comment %} <div class="form-group">
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Войти</button>
-        </form> {% endcomment %}
+
 
         <div class="form-group">
+            <div id="alertPlaceholder" style=" text-align: center;"></div>
+
             <form id="loginForm" method="post">
                 {% csrf_token %}
                 <div class="form-group1">
@@ -43,25 +40,22 @@
                 {% endif %}
                 <button type="submit">Войти</button>
             </form>
-            <div id="alertPlaceholder" style=" text-align: center;"></div>
         </div>
     </div>
 </div>
 
 <style>
     #alertPlaceholder {
-        position: absolute;
-        top: 10px; /* Расположим немного ниже верхнего края формы */
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10;
+
         display: none;
     }
     
     .alert {
+        font-size: 13.1px;
+    font-weight: 600;
         padding: 10px;
         color: white;
-        border-radius: 5px;
+        border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .danger{
@@ -92,10 +86,15 @@
                 password: $('#password').val(),
             },
             success: function(response) {
-                showAlert('Успешно!', 'success');
+                Swal.fire({
+                    icon: "success",
+                    title: "Добро пожаловать!",
+                    showConfirmButton: false,
+                    timer: 1500
+                  });
             setTimeout(function() {
                     window.location.href = "{% url 'users:login' %}"; // перенаправление на страницу входа
-                }, 2000); // перенаправляем через 3 секунды
+                }, 1500); // перенаправляем через 3 секунды
 },
             error: function(xhr, status, error) {
                 var errors = JSON.parse(xhr.responseText).errors;
@@ -118,10 +117,7 @@
         alertPlaceholder.innerHTML = '<div class="alert  ' + stage + '">' + message + '</div>';
         alertPlaceholder.style.display = 'block'; // Показываем уведомление
     
-        // Через 3 секунды скрываем уведомление
-        setTimeout(function() {
-            alertPlaceholder.style.display = 'none';
-        }, 3000);
+
     }
     
     </script>

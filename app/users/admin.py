@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Tab, TabCountry, TabTrackedWord, TabWebsite, Task, Comment, UserDevice
+from .models import Tab, TabCountry, TabTrackedWord, TabWebsite, TabCategory, Task, Comment, UserDevice
 
 
 # Register your models here.
@@ -37,6 +37,13 @@ class TabTrackedWordAdmin(admin.ModelAdmin):
     search_fields = ('tab__name', 'tracked_word__keyword')
     list_filter = ('tab',)
     raw_id_fields = ('tab', 'tracked_word')
+    
+@admin.register(TabCategory)
+class TabCategoryAdmin(admin.ModelAdmin):
+    list_display = ('tab', 'category')
+    search_fields = ('tab__name', 'category')
+    list_filter = ('tab',)
+    raw_id_fields = ('tab',)
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):

@@ -168,100 +168,107 @@
         background: #000000;
         box-shadow: 0 0 0 1px #000;
       }
+      .filter-block {
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ccc;
 
+    }
+    
+    .filter-block h3 {
+        font-size: 16px;
+        margin-bottom: 10px;
+        color: #333;
+
+    }
+    
+    .select-wrapper, .checkbox-wrapper-34 {
+        margin-bottom: 10px;
+    }
 
 </style>
 <aside class="sidebar">
     <button class="menu-close-aside" aria-label="Close navigation menu">✕</button>
-    <div class="checkbox-wrapper-34">
-        <input class='tgl tgl-ios' id='showOnlyFavorites' type='checkbox'>
-        <label class='tgl-btn' for='showOnlyFavorites'></label>
-        <span>Избранные сайты</span>
-    </div>
-
-
-
-    <!-- Select для вкладок -->
-    <div class="select-wrapper">
-        <select id="tabsSelect" class="select2">
-            <option value=""> </option>
-            {% for tab in tabs  %}
-            <option value="{{ tab.id }}">{{ tab }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <!-- Multi Select2 для стран -->
-    <div class="select-wrapper">
-        <select id="countriesSelect" class="select2" multiple="multiple">
-            <option value="all">Все</option>
-            {% for country in countries  %}
-            <option value="{{ country.id }}">{{ country.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <!-- Multi Select2 для сайтов -->
-    <div class="select-wrapper">
-        <select id="websitesSelect" class="select2" multiple="multiple">
-            <optgroup label="Избранные сайты:">
-                <option value="{% for site in favorite_sites %}{{ site.id  }},{% endfor %}">Все избранные сайты</option>
-
-                {% for site in favorite_sites %}
-                <option value="{{ site.id }}">{{ site.name }}</option>
-                {% endfor %}
-            </optgroup>
-            <optgroup label="Остальные сайты">
-                {% for site in other_sites %}
-                <option value="{{ site.id }}">{{ site.name }}</option>
-                {% endfor %}
-            </optgroup>
-        </select>
-    </div>
-    <div class="select-wrapper">
-        <select id="trackwordSelect" class="select2" multiple="multiple">
-            <option value="all">Все</option>
-            {% for trackword in tracked_words  %}
-            <option value="{{ trackword.id }}">{{ trackword.keyword }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-
-    <!-- Wrapper для выбора даты -->
-    <div class="date-picker-wrapper">
-        <div class="date-picker">
-            <label for="startDate">Дата начала:</label>
-            <input type="date" id="startDate">
-        </div>
-        <div class="date-picker">
-            <label for="endDate">Дата конца:</label>
-            <input type="date" id="endDate">
+    <div class="filter-block">
+        <h3>Избранные</h3>
+        <div class="checkbox-wrapper-34">
+            <input class='tgl tgl-ios' id='showOnlyFavorites' type='checkbox'>
+            <label class='tgl-btn' for='showOnlyFavorites'></label>
+            <span>Только избранные сайты</span>
         </div>
     </div>
 
+    <div class="filter-block">
+        <h3>Набор фильтров </h3>
+        <!-- Select для вкладок -->
+        <div class="select-wrapper">
+            <select id="tabsSelect" class="select2">
+                <option value=""> </option>
+                {% for tab in tabs  %}
+                <option value="{{ tab.id }}">{{ tab }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="filter-block">
+        <h3>Отображать</h3>
+        <!-- Multi Select2 для стран -->
+        <div class="select-wrapper">
+            <select id="countriesSelect" class="select2" multiple="multiple">
+                {% for country in countries  %}
+                <option value="{{ country.id }}">{{ country.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
+        <!-- Multi Select2 для сайтов -->
+        <div class="select-wrapper">
+            <select id="websitesSelect" class="select2" multiple="multiple">
+                <optgroup label="Избранные сайты:">
+                    <option value="{% for site in favorite_sites %}{{ site.id }},{% endfor %}">Все избранные сайты</option>
 
-    <div class="grid-container">
-        <div class="box">
-            <div class="filters">
-                <div class="visible-filters">
-                    <!-- Пример первых 7 фильтров, добавленные динамически -->
-                    {% for value, name in categories %}
-                        {% if forloop.counter <= 7 %}
-                            <div class="checkbox-rect">
-                                <input type="checkbox" id="checkbox-rect{{ forloop.counter }}" name="category" value="{{ value }}">
-                                <label for="checkbox-rect{{ forloop.counter }}">{{ name }}</label>
-                            </div>
-                        {% endif %}
+                    {% for site in favorite_sites %}
+                    <option value="{{ site.id }}">{{ site.name }}</option>
                     {% endfor %}
-                </div>
-                <div class="more-filters">
-                    <button id="toggleFilters">Больше рубрик</button>
-                    <div class="hidden-filters" style="display:none;">
-                        <!-- Пример оставшихся фильтров, добавленные динамически -->
+                </optgroup>
+                <optgroup label="Остальные сайты">
+                    <option value="{% for site in other_sites %}{{ site.id }},{% endfor %}">Все остальные сайты</option>
+
+                    {% for site in other_sites %}
+                    <option value="{{ site.id }}">{{ site.name }}</option>
+                    {% endfor %}
+                </optgroup>
+            </select>
+        </div>
+        <div class="select-wrapper">
+            <select id="trackwordSelect" class="select2" multiple="multiple">
+                <option value="{% for trackword in tracked_words %}{{ trackword.id }},{% endfor %}">Исключить все</option>
+                {% for trackword in tracked_words  %}
+                <option value="{{ trackword.id }}">{{ trackword.keyword }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Wrapper для выбора даты -->
+        <div class="date-picker-wrapper">
+            <div class="date-picker">
+                <label for="startDate">Дата начала:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="date-picker">
+                <label for="endDate">Дата конца:</label>
+                <input type="date" id="endDate">
+            </div>
+        </div>
+
+
+
+        <div class="grid-container">
+            <div class="box">
+                <div class="filters">
+                    <div class="visible-filters">
+                        <!-- Пример первых 7 фильтров, добавленные динамически -->
                         {% for value, name in categories %}
-                            {% if forloop.counter > 7 %}
+                            {% if forloop.counter <= 7 %}
                                 <div class="checkbox-rect">
                                     <input type="checkbox" id="checkbox-rect{{ forloop.counter }}" name="category" value="{{ value }}">
                                     <label for="checkbox-rect{{ forloop.counter }}">{{ name }}</label>
@@ -269,8 +276,61 @@
                             {% endif %}
                         {% endfor %}
                     </div>
+                    <div class="more-filters">
+                        <button id="toggleFilters">Больше рубрик</button>
+                        <div class="hidden-filters" style="display:none;">
+                            <!-- Пример оставшихся фильтров, добавленные динамически -->
+                            {% for value, name in categories %}
+                                {% if forloop.counter > 7 %}
+                                    <div class="checkbox-rect">
+                                        <input type="checkbox" id="checkbox-rect{{ forloop.counter }}" name="category" value="{{ value }}">
+                                        <label for="checkbox-rect{{ forloop.counter }}">{{ name }}</label>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="filter-block">
+        <h3>Исключить</h3>
+        <div class="select-wrapper">
+            <select id="excludedCountriesSelect" class="select2" multiple="multiple">
+                {% for country in countries %}
+                <option value="{{ country.id }}">Исключить {{ country.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Multi Select2 для исключения сайтов -->
+        <div class="select-wrapper">
+            <select id="excludedWebsitesSelect" class="select2" multiple="multiple">
+                <optgroup label="Исключить избранные сайты:">
+                    <option value="{% for site in favorite_sites %}{{ site.id }},{% endfor %}">Исключить все избранные сайты</option>
+        
+                    {% for site in favorite_sites %}
+                    <option value="{{ site.id }}">Исключить {{ site.name }}</option>
+                    {% endfor %}
+                </optgroup>
+                <optgroup label="Исключить остальные сайты">
+                    <option value="{% for site in favorite_sites %}{{ site.id }},{% endfor %}">Исключить все остальные сайты</option>
+                    {% for site in other_sites %}
+                    <option value="{{ site.id }}">Исключить {{ site.name }}</option>
+                    {% endfor %}
+                </optgroup>
+            </select>
+        </div>
+        
+        <!-- Multi Select2 для исключения отслеживаемых слов -->
+        <div class="select-wrapper">
+            <select id="excludedTrackwordSelect" class="select2" multiple="multiple">
+                <option value="{% for trackword in tracked_words %}{{ trackword.id }},{% endfor %}">Исключить все</option>
+                {% for trackword in tracked_words %}
+                <option value="{{ trackword.id }}">Исключить {{ trackword.keyword }}</option>
+                {% endfor %}
+            </select>
         </div>
     </div>
 <script>
@@ -287,28 +347,45 @@
 <script>
 
 
-
     $(document).ready(function () {
         $('#tabsSelect').select2({
-            placeholder: "Выберите вкладку",
+            placeholder: "Использовать набор",
             width: '100%',
             allowClear: true
 
         });
         $('#countriesSelect').select2({
-            placeholder: "Выберите страны",
+            placeholder: "Страны",
             width: '100%',
             allowClear: true
 
         });
         $('#websitesSelect').select2({
-            placeholder: "Выберите сайты",
+            placeholder: "Сайты",
             width: '100%',
             allowClear: true
 
         });
         $('#trackwordSelect').select2({
-            placeholder: "Выберите ключевые слова",
+            placeholder: "Ключевые слова",
+            width: '100%',
+            allowClear: true
+
+        });
+        $('#excludedCountriesSelect').select2({
+            placeholder: "Страны",
+            width: '100%',
+            allowClear: true
+
+        });
+        $('#excludedWebsitesSelect').select2({
+            placeholder: "Сайты",
+            width: '100%',
+            allowClear: true
+
+        });
+        $('#excludedTrackwordSelect').select2({
+            placeholder: "Ключевые слова",
             width: '100%',
             allowClear: true
 

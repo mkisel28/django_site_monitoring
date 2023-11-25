@@ -198,40 +198,21 @@ def country_articles(request, country_code):
     return render(request, 'main/country_articles.html', {'country': country})
 
 
+@login_required(login_url="/")
+def website_articles(request, website_id):
+    """
+    Отображает страницу со списком статей для конкретного сайта по его ID.
+    """
+    articles = Article.objects.filter(website_id=website_id).order_by(
+        "-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')
+
+    articles = create_articles(articles)
+    return render(request, 'main/article_list.html', {'articles': articles})
+
 ################ API##################
 
+#api_country_articles -удалена
 
-@login_required(login_url="/")
-def api_country_articles(request):
-    """
-    API-точка, которая возвращает статьи, относящиеся к конкретной стране.
-    """
-    country_code = request.GET.get('country')
-    only_favorites = request.GET.get('only_favorites')
-
-    country = get_object_or_404(Country, code=country_code)
-    articles = Article.objects.annotate(
-        is_favorite=Exists(
-            Website.objects.filter(
-                id=OuterRef('website_id'),
-                favorited_by=request.user
-            )
-        )
-    ).filter(website__country=country
-             ).order_by('-published_at'
-                        ).values('id', 'title', 'title_translate', 'url', 'published_at', 'website__name', 'website__id', 'website__country__name', 'is_favorite')
-
-    if only_favorites:
-        articles = articles.filter(website__favorited_by=request.user)[:100]
-        articles = create_articles(articles)[::-1]
-
-    else:
-        articles = create_articles(articles[:100])[::-1]
-    data = {
-        'articles': list(articles),
-    }
-
-    return JsonResponse(data)
 
 
 ######### ОСНАВНАЯ API-ТОЧКА############
@@ -268,74 +249,19 @@ def api_article_list(request):
             all_articles[country_id] = create_articles(articles)[::-1]
     return JsonResponse({'websites': all_articles})
 
-
-@login_required(login_url="/")
-def get_favorite_countries_articles_api(request):
-    """
-    API-точка, которая возвращает статьи из избранных стран пользователя.
-    """
-    # Получаем избранные страны пользователя
-    only_favorites = request.GET.get('only_favorites')
-
-    favourite_countries = request.user.favorite_countries.all()
-
-    # Получаем статьи из этих стран
-    articles = Article.objects.annotate(
-        is_favorite=Exists(
-            Website.objects.filter(
-                id=OuterRef('website_id'),
-                favorited_by=request.user
-            )
-        )
-    ).filter(website__country__in=favourite_countries).order_by("-published_at").values(
-        'id', 'title', 'title_translate', 'url', 'published_at', 'website__name', 'website__id', 'website__country__name', 'is_favorite'
-    )
-    articles = articles.filter(
-        Q(website__user=None) | Q(website__user=request.user)
-    )
-    if only_favorites:
-        articles = articles.filter(website__favorited_by=request.user)[:100]
-        articles = create_articles(articles)[::-1]
-
-    else:
-        articles = create_articles(articles[:100])[::-1]
-
-    return JsonResponse({'articles': list(articles)})
+#get_favorite_countries_articles_api была удалена
 
 
-@login_required(login_url="/")
-def get_all_live_articles_api(request):
-    """
-    API-точка, которая возвращает все статьи в реальном времени.
-    """
-    only_favorites = request.GET.get('only_favorites')
-    articles = Article.objects.annotate(
-        is_favorite=Exists(
-            Website.objects.filter(
-                id=OuterRef('website_id'),
-                favorited_by=request.user
-            )
-        )
-    ).order_by("-published_at").values(
-        'id', 'title', 'title_translate', 'url', 'published_at', 'website__name', 'website__id', 'website__country__name', 'is_favorite'
-    )
-    articles = articles.filter(
-        Q(website__user=None) | Q(website__user=request.user)
-    )
-    if only_favorites:
-        articles = articles.filter(website__favorited_by=request.user)[:100]
-    else:
-        articles = articles[:100]
-    articles = create_articles(articles)[::-1]
-    return JsonResponse({'articles': list(articles)})
+#get_all_live_articles_api - была удалена
 
 
-########## ОСТАЛЬНАЯ API-ТОЧКИ############
+
+########## ОСНОВНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
 def articles_for_related_data(request, data_id, data_type):
     """
     Получает статьи, связанные с определенным типом данных (словом или отслеживаемым словом) на основе
-    предоставленных фильтров запроса.
+    предоставленных фильтров запроса. Используется в облаке слов.
 
     Args:
     - request (HttpRequest): Запрос от клиента.
@@ -423,18 +349,7 @@ def articles_for_related_data(request, data_id, data_type):
     return JsonResponse({'articles': list(articles)})
 
 
-@login_required(login_url="/")
-def website_articles(request, website_id):
-    """
-    Отображает страницу со списком статей для конкретного сайта по его ID.
-    """
-    articles = Article.objects.filter(website_id=website_id).order_by(
-        "-published_at").values('id', 'title', 'title_translate', 'url', 'published_at')
-
-    articles = create_articles(articles)
-    return render(request, 'main/article_list.html', {'articles': articles})
-
-
+########## ОСНОВНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
 def add_website_to_favorites_api(request, website_id):
     """
@@ -447,7 +362,7 @@ def add_website_to_favorites_api(request, website_id):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
-
+########## ОСНОВНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
 def remove_website_from_favorites_api(request, website_id):
     """
@@ -461,6 +376,7 @@ def remove_website_from_favorites_api(request, website_id):
         return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 
+########## ОСНОВНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
 def add_country_to_favorites_api(request, country_code):
     """
@@ -477,6 +393,7 @@ def add_country_to_favorites_api(request, country_code):
         return JsonResponse({"status": "error", "message": str(e)})
 
 
+########## ОСНОВНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
 def remove_country_from_favorites_api(request, country_code):
     """
@@ -493,9 +410,32 @@ def remove_country_from_favorites_api(request, country_code):
         return JsonResponse({"status": "error", "message": str(e)})
 
 
-########## ОСТАЛЬНАЯ API-ТОЧКИ############
+########## ОСНОВНАЯ API-ТОЧКИ############
 @login_required(login_url="/")
 def get_tab_data_api(request):
+    """
+    API-точка для получения данных связанных с определенным набором фильтров.
+
+    Этот метод возвращает данные по странам, веб-сайтам и отслеживаемым словам,
+    связанным с указанным набором фильтров. Используется для подгрузки детальной информации
+    о наборе на основе её идентификатора.
+
+    Args:
+        `request` (HttpRequest): Объект запроса Django, содержащий параметры GET.
+
+    Returns:
+        `JsonResponse`: Объект ответа Django с данными набора фильтров  в формате JSON.
+                      В случае отсутствия идентификатора набора фильтров возвращается
+                      ответ с кодом 400 и сообщением об ошибке.
+
+    Examples:
+        - Запрос GET /api/get_tab_data?tab_id=123
+        - Возвращает JSON с идентификаторами стран, сайтов и отслеживаемых слов,
+        связанных с набором фильтроов, идентификатор которой равен 123.
+        
+    Exepctions:
+        `400`: Если не указан идентификатор набора фильтров или набор не найдена.
+    """
     tab_id = request.GET.get('tab_id')
     if not tab_id:
         return JsonResponse({'error': 'No tab id provided'}, status=400)
@@ -521,7 +461,8 @@ def get_tab_data_api(request):
 @login_required(login_url="/")
 def test(request):
     """
-    Объединенная API-точка для получения статей на основе различных критериев.
+    Объединенная API-точка для получения статей на основе различных критериев,
+    включая возможность исключения определенных категорий, стран или сайтов.
     """
     country_code = request.GET.get('country')
     website_id = request.GET.get('website_id')
@@ -554,6 +495,24 @@ def test(request):
     articles = articles.filter(
         Q(website__user=None) | Q(website__user=request.user)
     )
+    
+
+    excluded_categories = get_int_list_from_request(request, 'excluded_categories') #TODO: Добавить
+    excluded_countries = get_int_list_from_request(request, 'excluded_countries')
+    excluded_websites = get_int_list_from_request(request, 'excluded_websites')
+    excluded_tracked_words = get_int_list_from_request(request, 'excluded_trackwords')
+
+    # Применение фильтров исключения
+    if excluded_categories:
+        articles = articles.exclude(category__in=excluded_categories)
+    if excluded_countries:
+        articles = articles.exclude(website__country_id__in=excluded_countries)
+    if excluded_websites:
+        articles = articles.exclude(website_id__in=excluded_websites)
+    if excluded_tracked_words:
+        articles = articles.exclude(
+            mentions__word__id__in=excluded_tracked_words)
+        
     articles = articles.annotate(
         is_favorite=Exists(
             Website.objects.filter(

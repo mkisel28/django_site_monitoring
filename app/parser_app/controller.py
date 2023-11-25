@@ -143,11 +143,17 @@ def top_words():
         logger_tw.exception(f"Непредвиденная ошибка при очистке старых слов: {e}")
         
     try:
+        "TODO есть смысл сделать привязку по уникальным словам, удалив повторения, что позволит всегда держать актуальный список за 1 час"
         for word_text, count in top_10_words:
-            word, created = Word.objects.get_or_create(text=word_text)
-            word.frequency = count
+            word = Word(text=word_text, frequency=count)
             word.save()
-            word.articles.add(*[article for article in recent_articles if word_text in (article.normalized_title or "").split()])
+            # Привязка слова к статьям, в которых оно встречается
+            for article in recent_articles:
+                if article.normalized_title:
+                    if word_text in article.normalized_title.split():
+                        word.articles.add(article)
+
+            word.save()
     except DatabaseError as e:
         logger_tw.error(f"Ошибка базы данных при сохранении слов: {e}")
     except Exception as e:

@@ -179,8 +179,8 @@ function fetchArticles(dataId, dataType, queryParams) {
                 var formattedDate = formatDateTime(article.published_at);
                 
                 var favoriteIcon = article.is_favorite ?
-                    `<a href="#" class="toggle-favorite" data-action="/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
-                    `<a href="#" class="toggle-favorite" data-action="/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
+                    `<a href="#" class="toggle-favorite" data-action="/api/remove_favorite/${article.website__id}/"><i class="fas fa-star"></i></a>` :
+                    `<a href="#" class="toggle-favorite" data-action="/api/add_favorite/${article.website__id}/"><i class="far fa-star"></i></a>`;
                 
                 var taskIcon = article.task_status ?
                     `<a href="#" class="toggle-task" data-action="/update_task/${article.id}/"><i class="fas fa-tasks" style="color: #005eff;"></i></a>` :
